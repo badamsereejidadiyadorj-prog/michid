@@ -25,7 +25,7 @@ export default async function handler(
       const payload = { key, value };
       const { data, error } = await sb
         .from("site_settings")
-        .upsert([payload], { onConflict: ["key"] })
+        .upsert([payload], { onConflict: "key" })
         .select()
         .single();
       if (error) throw error;
