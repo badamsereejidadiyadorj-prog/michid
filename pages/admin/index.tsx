@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Nav from "../../components/Nav";
+import AdminSidebar from "../../components/AdminSidebar";
 import { supabase } from "../../lib/supabaseClient";
 
 export default function AdminIndex() {
@@ -128,7 +129,11 @@ export default function AdminIndex() {
     <div className="min-h-screen bg-[#0f0518] text-[#F5F5DC]">
       <Nav lang={"mn"} setLang={() => {}} onSubmenu={() => {}} />
 
-      <main className="container mx-auto min-h-screen pt-20 px-6 py-20 relative">
+      <main className="container mx-auto min-h-screen pt-20 px-6 py-20 relative grid md:grid-cols-4 gap-6">
+        <div className="md:col-span-1">
+          <AdminSidebar />
+        </div>
+
         {!user && (
           <div className="absolute inset-0 top-1/2 -translate-y-1/2 bg-black/60 backdrop-blur-sm z-40 flex items-center justify-center">
             <div className="bg-[#140824]  p-8 rounded-lg w-full max-w-md border border-purple-800">
@@ -162,76 +167,77 @@ export default function AdminIndex() {
             </div>
           </div>
         )}
+        <div className="md:col-span-3">
+          <h1 className="text-3xl font-serif text-amber-400 mb-6">
+            Админ самбар
+          </h1>
+          {user ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Link
+                href="/admin/products"
+                className="block p-6 bg-[#140824] rounded-lg border border-purple-800 hover:border-amber-500 transition-colors">
+                Бүтээгдэхүүн
+              </Link>
+              <Link
+                href="/admin/categories"
+                className="block p-6 bg-[#140824] rounded-lg border border-purple-800 hover:border-amber-500 transition-colors">
+                Ангилалууд
+              </Link>
+              <Link
+                href="/admin/usages"
+                className="block p-6 bg-[#140824] rounded-lg border border-purple-800 hover:border-amber-500 transition-colors">
+                Ашиглалт
+              </Link>
+              <button
+                onClick={signOut}
+                className="mt-6 px-4 py-2 bg-red-600 rounded col-span-full">
+                Гарах
+              </button>
+            </div>
+          ) : (
+            <div className="text-purple-300">
+              Сайт удирдахын тулд нэвтэрнэ үү.
+            </div>
+          )}
 
-        <h1 className="text-3xl font-serif text-amber-400 mb-6">
-          Admin Dashboard
-        </h1>
-        {user ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Link
-              href="/admin/products"
-              className="block p-6 bg-[#140824] rounded-lg border border-purple-800 hover:border-amber-500 transition-colors">
-              Products
-            </Link>
-            <Link
-              href="/admin/categories"
-              className="block p-6 bg-[#140824] rounded-lg border border-purple-800 hover:border-amber-500 transition-colors">
-              Categories
-            </Link>
-            <Link
-              href="/admin/usages"
-              className="block p-6 bg-[#140824] rounded-lg border border-purple-800 hover:border-amber-500 transition-colors">
-              Usages
-            </Link>
-            <button
-              onClick={signOut}
-              className="mt-6 px-4 py-2 bg-red-600 rounded col-span-full">
-              Sign out
-            </button>
-          </div>
-        ) : (
-          <div className="text-purple-300">
-            Please sign in to manage the site.
-          </div>
-        )}
+          {user && (
+            <div style={{ maxWidth: 1100, margin: "24px auto", padding: 20 }}>
+              <section style={{ marginTop: 16 }}>
+                <h3>Ангилалууд</h3>
+                <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                  <input
+                    value={newCat}
+                    onChange={(e) => setNewCat(e.target.value)}
+                    placeholder="Шинэ ангилалын нэр"
+                  />
+                  <button onClick={addCategory}>Нэмэх</button>
+                  <button onClick={initSampleData}>
+                    Supabase: Туршилтын өгөгдөл үүсгэх
+                  </button>
+                </div>
+                <ul>
+                  {categories.map((c) => (
+                    <li key={c.id}>
+                      {c.id} — {c.name || c.title}
+                    </li>
+                  ))}
+                </ul>
+              </section>
 
-        {user && (
-          <div style={{ maxWidth: 1100, margin: "24px auto", padding: 20 }}>
-            <section style={{ marginTop: 16 }}>
-              <h3>Categories</h3>
-              <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-                <input
-                  value={newCat}
-                  onChange={(e) => setNewCat(e.target.value)}
-                  placeholder="New category name"
-                />
-                <button onClick={addCategory}>Add</button>
-                <button onClick={initSampleData}>
-                  Supabase: Init Sample Data
-                </button>
-              </div>
-              <ul>
-                {categories.map((c) => (
-                  <li key={c.id}>
-                    {c.id} — {c.name || c.title}
-                  </li>
-                ))}
-              </ul>
-            </section>
-
-            <section style={{ marginTop: 24 }}>
-              <h3>Orders</h3>
-              <button onClick={fetchOrders}>Refresh Orders</button>
-              <ul>
-                {orders.map((o) => (
-                  <li key={o.id}>
-                    {o.id} — {o.status} — total: {o.total}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          </div>
-        )}
+              <section style={{ marginTop: 24 }}>
+                <h3>Захиалгууд</h3>
+                <button onClick={fetchOrders}>Захиалгыг шинэчлэх</button>
+                <ul>
+                  {orders.map((o) => (
+                    <li key={o.id}>
+                      {o.id} — {o.status} — total: {o.total}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );

@@ -78,12 +78,12 @@ export default function ProductsPage() {
       <Nav lang={lang} setLang={setLang} onSubmenu={() => {}} />
       <SocialSidebar />
 
-      <main className="container mx-auto px-6 py-20">
+      <main className="container mx-auto px-6 py-[100px]">
         <header className="mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div>
-            <h1 className="text-4xl font-serif text-amber-100">Products</h1>
+            <h1 className="text-4xl font-serif text-amber-100">Бүтээгдэхүүн</h1>
             <p className="text-purple-300 text-sm mt-2">
-              Filter by category, usage or search by name.
+              Ангилал, хэрэглээгээр шүүж эсвэл нэрээр хайна уу.
             </p>
           </div>
 
@@ -91,14 +91,14 @@ export default function ProductsPage() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search products..."
+              placeholder="Бүтээгдэхүүнийг хайх..."
               className="w-full md:w-72 px-4 py-2 rounded border border-purple-700 bg-[#12041a] text-purple-200"
             />
             <select
               value={category ?? ""}
               onChange={(e) => setCategory(e.target.value || null)}
               className="px-3 py-2 bg-[#12041a] border border-purple-700 rounded text-purple-200">
-              <option value="">All Categories</option>
+              <option value="">Бүх ангилал</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {TEXTS[c.title_key || c.titleKey]?.[lang] ?? c.id}
@@ -109,10 +109,10 @@ export default function ProductsPage() {
               value={usage ?? ""}
               onChange={(e) => setUsage(e.target.value || null)}
               className="px-3 py-2 bg-[#12041a] border border-purple-700 rounded text-purple-200">
-              <option value="">All Usages</option>
-              <option value="ceremonial">Ceremonial</option>
-              <option value="everyday">Everyday</option>
-              <option value="winter">Winter</option>
+              <option value="">Бүх хэрэглэх зориулалт</option>
+              <option value="ceremonial">Ёслолын</option>
+              <option value="everyday">Өдөр тутмын</option>
+              <option value="winter">Өвлийн</option>
             </select>
             <button
               onClick={() => {
@@ -121,7 +121,7 @@ export default function ProductsPage() {
                 setQuery("");
               }}
               className="px-3 py-2 bg-purple-800/40 rounded text-sm text-purple-200">
-              Reset
+              Сэргээх
             </button>
           </div>
         </header>
@@ -129,7 +129,7 @@ export default function ProductsPage() {
         <section>
           {filtered.length === 0 ? (
             <div className="text-center py-24 text-purple-300">
-              No products found.
+              Бүтээгдэхүүн олдсонгүй.
             </div>
           ) : (
             <div className="grid md:grid-cols-3 gap-8">

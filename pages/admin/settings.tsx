@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Nav from "../../components/Nav";
+import AdminSidebar from "../../components/AdminSidebar";
 import { supabase } from "../../lib/supabaseClient";
 
 export default function AdminSettings() {
@@ -112,7 +113,7 @@ export default function AdminSettings() {
         <Nav lang={"mn"} setLang={() => {}} onSubmenu={() => {}} />
         <main className="container mx-auto px-6 py-20 text-center">
           <div className="bg-[#140824] p-8 rounded border border-purple-800 inline-block">
-            You must sign in via /admin to access this page.
+            Энэ хуудас руу хандахын тулд /admin-аар нэвтэрнэ үү.
           </div>
         </main>
       </div>
@@ -122,87 +123,49 @@ export default function AdminSettings() {
   return (
     <div className="min-h-screen bg-[#0f0518] text-[#F5F5DC]">
       <Nav lang={"mn"} setLang={() => {}} onSubmenu={() => {}} />
-      <main className="container pt-20 mx-auto px-6 py-12">
-        <h2 className="text-2xl font-serif text-amber-400 mb-4">
-          Site Settings
-        </h2>
+      <main className="container pt-20 mx-auto px-6 py-12 grid md:grid-cols-4 gap-6">
+        <div className="md:col-span-1">
+          <AdminSidebar />
+        </div>
+        <div className="md:col-span-3">
+          <h2 className="text-2xl font-serif text-amber-400 mb-4">
+            Сайтын тохиргоо
+          </h2>
 
-        <section className="bg-[#140824] p-4 rounded border border-purple-800 mb-6">
-          <h3 className="font-semibold mb-2">Hero</h3>
-          <input
-            className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded"
-            placeholder="Title (MN)"
-            value={hero.title_mn || ""}
-            onChange={(e) => setHero({ ...hero, title_mn: e.target.value })}
-          />
-          <input
-            className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded"
-            placeholder="Title (EN)"
-            value={hero.title_en || ""}
-            onChange={(e) => setHero({ ...hero, title_en: e.target.value })}
-          />
-          <input
-            className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded"
-            placeholder="Subtitle (MN)"
-            value={hero.subtitle_mn || ""}
-            onChange={(e) => setHero({ ...hero, subtitle_mn: e.target.value })}
-          />
-          <input
-            className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded"
-            placeholder="Subtitle (EN)"
-            value={hero.subtitle_en || ""}
-            onChange={(e) => setHero({ ...hero, subtitle_en: e.target.value })}
-          />
-          <div className="mb-2">
-            <label className="text-sm text-purple-300 block mb-1">
-              Hero Image
-            </label>
+          <section className="bg-[#140824] p-4 rounded border border-purple-800 mb-6">
+            <h3 className="font-semibold mb-2">Товч гарчиг (Hero)</h3>
             <input
-              type="file"
-              accept="image/*"
-              onChange={async (e) => {
-                const f = e.target.files?.[0];
-                if (!f) return;
-                try {
-                  const path = await uploadImage(f);
-                  setHero((h: any) => ({ ...h, image: path }));
-                } catch (err: any) {
-                  alert(err.message || String(err));
-                }
-              }}
+              className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded"
+              placeholder="Гарчиг (MN)"
+              value={hero.title_mn || ""}
+              onChange={(e) => setHero({ ...hero, title_mn: e.target.value })}
             />
-            {hero.image && (
-              <div className="text-xs text-purple-300 mt-2">
-                Uploaded: {String(hero.image)}
-              </div>
-            )}
-          </div>
-        </section>
-
-        <section className="bg-[#140824] p-4 rounded border border-purple-800 mb-6">
-          <h3 className="font-semibold mb-2">Social Links</h3>
-          {socials.map((s, i) => (
-            <div key={i} className="mb-3 flex gap-2 items-center">
-              <input
-                className="flex-1 p-2 bg-[#12041a] border border-purple-700 rounded"
-                value={s.name || ""}
-                onChange={(e) => {
-                  const copy = [...socials];
-                  copy[i].name = e.target.value;
-                  setSocials(copy);
-                }}
-                placeholder="name"
-              />
-              <input
-                className="flex-2 p-2 bg-[#12041a] border border-purple-700 rounded"
-                value={s.url || ""}
-                onChange={(e) => {
-                  const copy = [...socials];
-                  copy[i].url = e.target.value;
-                  setSocials(copy);
-                }}
-                placeholder="url"
-              />
+            <input
+              className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded"
+              placeholder="Гарчиг (EN)"
+              value={hero.title_en || ""}
+              onChange={(e) => setHero({ ...hero, title_en: e.target.value })}
+            />
+            <input
+              className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded"
+              placeholder="Дэд гарчиг (MN)"
+              value={hero.subtitle_mn || ""}
+              onChange={(e) =>
+                setHero({ ...hero, subtitle_mn: e.target.value })
+              }
+            />
+            <input
+              className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded"
+              placeholder="Дэд гарчиг (EN)"
+              value={hero.subtitle_en || ""}
+              onChange={(e) =>
+                setHero({ ...hero, subtitle_en: e.target.value })
+              }
+            />
+            <div className="mb-2">
+              <label className="text-sm text-purple-300 block mb-1">
+                Гарчиг Зураг
+              </label>
               <input
                 type="file"
                 accept="image/*"
@@ -211,39 +174,86 @@ export default function AdminSettings() {
                   if (!f) return;
                   try {
                     const path = await uploadImage(f);
-                    const copy = [...socials];
-                    copy[i].icon = path;
-                    setSocials(copy);
+                    setHero((h: any) => ({ ...h, image: path }));
                   } catch (err: any) {
                     alert(err.message || String(err));
                   }
                 }}
               />
-              <button
-                onClick={() =>
-                  setSocials((socs) => socs.filter((_, idx) => idx !== i))
-                }
-                className="text-red-400">
-                Delete
-              </button>
+              {hero.image && (
+                <div className="text-xs text-purple-300 mt-2">
+                  Хуулагдсан: {String(hero.image)}
+                </div>
+              )}
             </div>
-          ))}
-          <button
-            onClick={() =>
-              setSocials((s) => [...s, { name: "", url: "", icon: null }])
-            }
-            className="px-3 py-1 bg-amber-500 rounded">
-            Add Social
-          </button>
-        </section>
+          </section>
 
-        <div className="flex gap-2">
-          <button
-            onClick={saveAll}
-            disabled={loading}
-            className="px-4 py-2 bg-amber-500 rounded">
-            Save
-          </button>
+          <section className="bg-[#140824] p-4 rounded border border-purple-800 mb-6">
+            <h3 className="font-semibold mb-2">Нийгмийн холбоосууд</h3>
+            {socials.map((s, i) => (
+              <div key={i} className="mb-3 flex gap-2 items-center">
+                <input
+                  className="flex-1 p-2 bg-[#12041a] border border-purple-700 rounded"
+                  value={s.name || ""}
+                  onChange={(e) => {
+                    const copy = [...socials];
+                    copy[i].name = e.target.value;
+                    setSocials(copy);
+                  }}
+                  placeholder="Нэр"
+                />
+                <input
+                  className="flex-2 p-2 bg-[#12041a] border border-purple-700 rounded"
+                  value={s.url || ""}
+                  onChange={(e) => {
+                    const copy = [...socials];
+                    copy[i].url = e.target.value;
+                    setSocials(copy);
+                  }}
+                  placeholder="URL"
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    try {
+                      const path = await uploadImage(f);
+                      const copy = [...socials];
+                      copy[i].icon = path;
+                      setSocials(copy);
+                    } catch (err: any) {
+                      alert(err.message || String(err));
+                    }
+                  }}
+                />
+                <button
+                  onClick={() =>
+                    setSocials((socs) => socs.filter((_, idx) => idx !== i))
+                  }
+                  className="text-red-400">
+                  Устгах
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={() =>
+                setSocials((s) => [...s, { name: "", url: "", icon: null }])
+              }
+              className="px-3 py-1 bg-amber-500 rounded">
+              Холбоос нэмэх
+            </button>
+          </section>
+
+          <div className="flex gap-2">
+            <button
+              onClick={saveAll}
+              disabled={loading}
+              className="px-4 py-2 bg-amber-500 rounded">
+              Хадгалах
+            </button>
+          </div>
         </div>
       </main>
     </div>

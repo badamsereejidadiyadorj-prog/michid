@@ -134,9 +134,7 @@ export default function Collection({
             </button>
             <h3 className="text-2xl font-serif text-white mb-8 border-l-4 border-amber-500 pl-4">
               {activeCategory
-                ? TEXTS[
-                    categories.find((c) => c.id === activeCategory)?.titleKey
-                  ][lang]
+                ? categories.find((c) => c.id === activeCategory)?.titleKey
                 : TEXTS[`submenu_${activeUsage}`][lang]}
             </h3>
             <div className="grid md:grid-cols-3 gap-8">

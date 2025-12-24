@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Nav from "../../components/Nav";
+import AdminSidebar from "../../components/AdminSidebar";
 import { supabase } from "../../lib/supabaseClient";
 
 export default function AdminProducts() {
@@ -136,7 +137,7 @@ export default function AdminProducts() {
         <Nav lang={"mn"} setLang={() => {}} onSubmenu={() => {}} />
         <main className="container mx-auto px-6 py-20 text-center">
           <div className="bg-[#140824] p-8 rounded border border-purple-800 inline-block">
-            You must sign in via /admin to access this page.
+            Энэ хуудас руу хандахын тулд /admin-аар нэвтэрнэ үү.
           </div>
         </main>
       </div>
@@ -145,97 +146,106 @@ export default function AdminProducts() {
   return (
     <div className="min-h-screen bg-[#0f0518] text-[#F5F5DC]">
       <Nav lang={"mn"} setLang={() => {}} onSubmenu={() => {}} />
-      <main className="container  pt-20 mx-auto px-6 py-12">
-        <h2 className="text-2xl font-serif text-amber-400 mb-4">
-          Manage Products
-        </h2>
+      <main className="container  pt-20 mx-auto px-6 py-12 grid md:grid-cols-4 gap-6">
+        <div className="md:col-span-1">
+          <AdminSidebar />
+        </div>
+        <div className="md:col-span-3">
+          <h2 className="text-2xl font-serif text-amber-400 mb-4">
+            Бүтээгдэхүүн удирдах
+          </h2>
 
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <div className="p-4 bg-[#140824] rounded border border-purple-800">
-            <h3 className="font-semibold mb-3">New Product</h3>
-            <input
-              className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded"
-              placeholder="Title"
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-            />
-            <input
-              className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded"
-              placeholder="Price"
-              value={form.price}
-              onChange={(e) => setForm({ ...form, price: e.target.value })}
-            />
-            <select
-              value={form.categoryId}
-              onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
-              className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded">
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.title_key || c.id}
-                </option>
-              ))}
-            </select>
-            <select
-              value={form.usage}
-              onChange={(e) => setForm({ ...form, usage: e.target.value })}
-              className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded">
-              <option value="ceremonial">Ceremonial</option>
-              <option value="everyday">Everyday</option>
-              <option value="winter">Winter</option>
-            </select>
-            <textarea
-              className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded"
-              placeholder="Description"
-              value={form.description}
-              onChange={(e) =>
-                setForm({ ...form, description: e.target.value })
-              }
-            />
-            <div className="mb-2">
-              <label className="text-sm text-purple-300 block mb-1">
-                Upload Image
-              </label>
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            <div className="p-4 bg-[#140824] rounded border border-purple-800">
+              <h3 className="font-semibold mb-3">Шинэ бүтээгдэхүүн</h3>
               <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) uploadFile(f);
-                }}
+                className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded"
+                placeholder="Гарчиг"
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
               />
-              {form.image && (
-                <div className="text-xs text-purple-300 mt-2">
-                  Uploaded: {form.image}
-                </div>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <button onClick={add} className="px-4 py-2 bg-amber-500 rounded">
-                Add Product
-              </button>
-            </div>
-          </div>
-
-          <div className="p-4 bg-[#140824] rounded border border-purple-800 overflow-auto max-h-[420px]">
-            <h3 className="font-semibold mb-3">Existing</h3>
-            <div className="space-y-3">
-              {products.map((p: any) => (
-                <div
-                  key={p.id}
-                  className="flex justify-between items-center p-2 bg-[#12041a] rounded">
-                  <div>
-                    <div className="font-serif text-amber-200">{p.title}</div>
-                    <div className="text-xs text-purple-300">
-                      {p.price} • {p.category_id || p.categoryId}
-                    </div>
+              <input
+                className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded"
+                placeholder="Үнэ"
+                value={form.price}
+                onChange={(e) => setForm({ ...form, price: e.target.value })}
+              />
+              <select
+                value={form.categoryId}
+                onChange={(e) =>
+                  setForm({ ...form, categoryId: e.target.value })
+                }
+                className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded">
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.title_key || c.id}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={form.usage}
+                onChange={(e) => setForm({ ...form, usage: e.target.value })}
+                className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded">
+                <option value="ceremonial">Ариун ёслолын</option>
+                <option value="everyday">Өдөр тутмын</option>
+                <option value="winter">Өвлийн</option>
+              </select>
+              <textarea
+                className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded"
+                placeholder="Тайлбар"
+                value={form.description}
+                onChange={(e) =>
+                  setForm({ ...form, description: e.target.value })
+                }
+              />
+              <div className="mb-2">
+                <label className="text-sm text-purple-300 block mb-1">
+                  Зураг оруулах
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) uploadFile(f);
+                  }}
+                />
+                {form.image && (
+                  <div className="text-xs text-purple-300 mt-2">
+                    Хуулагдсан: {form.image}
                   </div>
-                  <button
-                    onClick={() => remove(p.id)}
-                    className="text-red-400 text-sm">
-                    Delete
-                  </button>
-                </div>
-              ))}
+                )}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={add}
+                  className="px-4 py-2 bg-amber-500 rounded">
+                  Бүтээгдэхүүн нэмэх
+                </button>
+              </div>
+            </div>
+
+            <div className="p-4 bg-[#140824] rounded border border-purple-800 overflow-auto max-h-[420px]">
+              <h3 className="font-semibold mb-3">Одоо байгаа</h3>
+              <div className="space-y-3">
+                {products.map((p: any) => (
+                  <div
+                    key={p.id}
+                    className="flex justify-between items-center p-2 bg-[#12041a] rounded">
+                    <div>
+                      <div className="font-serif text-amber-200">{p.title}</div>
+                      <div className="text-xs text-purple-300">
+                        {p.price} • {p.category_id || p.categoryId}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => remove(p.id)}
+                      className="text-red-400 text-sm">
+                      Устгах
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
