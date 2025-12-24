@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ChevronDown, Menu, X, Globe } from "lucide-react";
 import { TEXTS } from "../lib/data";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 export default function Nav({
   lang,
@@ -31,7 +31,14 @@ export default function Nav({
         const res = await fetch("/api/admin/usages");
         if (res.ok) {
           const data = await res.json();
-          setUsages(data || []);
+          // normalize to an array (support either [] or { usages: [] }) and force a new array ref
+          const arr =
+            Array.isArray(data) || Array.isArray(data as any) || (data as any)
+              ? (data as any)
+              : [];
+          setUsages([...arr]);
+        } else {
+          setUsages([]);
         }
       } catch (err) {
         setUsages([]);
@@ -43,9 +50,6 @@ export default function Nav({
     if (lang === "mn") setLang("en");
     else setLang("mn");
   };
-
-  console.log(usages);
-
   return (
     <nav
       className={`fixed w-full z-50 transition-all duration-500 ${
@@ -76,7 +80,7 @@ export default function Nav({
         {/* Desktop Menu */}
         <div className="hidden lg:flex items-center gap-6 text-xs xl:text-sm uppercase tracking-widest text-purple-200">
           <a
-            href="#home"
+            href="/#home"
             onClick={() => {
               setActiveCategory?.(null);
               setActiveUsage?.(null);
@@ -88,7 +92,7 @@ export default function Nav({
           {/* Collection Dropdown */}
           <div className="group relative">
             <a
-              href="#collection"
+              href="/#collection"
               className="hover:text-amber-400 transition-colors py-4 flex items-center gap-1">
               {TEXTS.nav_collection[lang]}{" "}
               <ChevronDown
@@ -97,25 +101,7 @@ export default function Nav({
               />
             </a>
             <div className="absolute top-full left-1/2 -translate-x-1/2 w-48 bg-[#1a0b2e]/95 backdrop-blur-md border border-amber-500/30 shadow-[0_10px_40px_rgba(0,0,0,0.5)] rounded-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-              {usages.length === 0 ? (
-                <>
-                  <button
-                    onClick={() => handleSubMenuClick?.("ceremonial")}
-                    className="w-full text-left px-6 py-3 hover:bg-purple-900/50 hover:text-amber-400 transition-colors border-b border-purple-800/50 last:border-0">
-                    {TEXTS.submenu_ceremonial[lang]}
-                  </button>
-                  <button
-                    onClick={() => handleSubMenuClick?.("everyday")}
-                    className="w-full text-left px-6 py-3 hover:bg-purple-900/50 hover:text-amber-400 transition-colors border-b border-purple-800/50 last:border-0">
-                    {TEXTS.submenu_everyday[lang]}
-                  </button>
-                  <button
-                    onClick={() => handleSubMenuClick?.("winter")}
-                    className="w-full text-left px-6 py-3 hover:bg-purple-900/50 hover:text-amber-400 transition-colors">
-                    {TEXTS.submenu_winter[lang]}
-                  </button>
-                </>
-              ) : (
+              {usages && usages.length > 0 ? (
                 usages.map((u) => (
                   <button
                     key={u.key}
@@ -124,28 +110,54 @@ export default function Nav({
                       setActiveCategory?.(null);
                       setActiveUsage?.(k);
                       const cb = handleSubMenuClick || onSubmenu;
-                      if (cb) cb(k);
-                      else
-                        router.push(`/products?usage=${encodeURIComponent(k)}`);
+                      router.push(`/products?usage=${u.key}`);
                     }}
                     className="w-full text-left px-6 py-3 hover:bg-purple-900/50 hover:text-amber-400 transition-colors border-b border-purple-800/50 last:border-0">
                     {u.label || u.key}
                   </button>
                 ))
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      handleSubMenuClick?.("ceremonial");
+                    }}
+                    className="w-full text-left px-6 py-3 hover:bg-purple-900/50 hover:text-amber-400 transition-colors border-b border-purple-800/50 last:border-0">
+                    {TEXTS.submenu_ceremonial[lang]}
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleSubMenuClick?.("everyday");
+                    }}
+                    className="w-full text-left px-6 py-3 hover:bg-purple-900/50 hover:text-amber-400 transition-colors border-b border-purple-800/50 last:border-0">
+                    {TEXTS.submenu_everyday[lang]}
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleSubMenuClick?.("winter");
+                    }}
+                    className="w-full text-left px-6 py-3 hover:bg-purple-900/50 hover:text-amber-400 transition-colors border-b border-purple-800/50 last:border-0">
+                    {TEXTS.submenu_winter[lang]}
+                  </button>
+                </>
               )}
             </div>
           </div>
 
-          <a href="#gallery" className="hover:text-amber-400 transition-colors">
+          <a
+            href="/#gallery"
+            className="hover:text-amber-400 transition-colors">
             {TEXTS.nav_gallery[lang]}
           </a>
           <a href="#clients" className="hover:text-amber-400 transition-colors">
             {TEXTS.nav_clients[lang]}
           </a>
-          <a href="#about" className="hover:text-amber-400 transition-colors">
+          <a href="/#about" className="hover:text-amber-400 transition-colors">
             {TEXTS.nav_about[lang]}
           </a>
-          <a href="#contact" className="hover:text-amber-400 transition-colors">
+          <a
+            href="/#contact"
+            className="hover:text-amber-400 transition-colors">
             {TEXTS.nav_contact[lang]}
           </a>
 
