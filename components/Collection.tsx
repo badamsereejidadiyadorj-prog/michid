@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { TEXTS } from "../lib/data";
 import ThreeDCard from "./ThreeDCard";
 import { ChevronRight, ArrowLeft, ZoomIn } from "lucide-react";
+import { useRouter } from "next/router";
 export default function Collection({
-  lang,
+  lang = "mn",
   activeCategory,
   setActiveCategory,
   activeUsage,
@@ -14,6 +15,8 @@ export default function Collection({
 }: any) {
   const [categories, setCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [usages, setUsages] = useState<any[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     (async () => {
@@ -29,6 +32,20 @@ export default function Collection({
       } catch (e) {
         setCategories([]);
         setProducts([]);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/admin/usages");
+        if (res.ok) {
+          const data = await res.json();
+          setUsages(data || []);
+        }
+      } catch (err) {
+        setUsages([]);
       }
     })();
   }, []);
@@ -53,31 +70,55 @@ export default function Collection({
         </div>
 
         {!activeCategory && !activeUsage && (
-          <div className="grid md:grid-cols-3 gap-8">
-            {categories.map((cat: any) => (
-              <div
-                key={cat.id}
-                onClick={() => setActiveCategory?.(cat.id)}
-                className="cursor-pointer">
-                <ThreeDCard className="group h-96 relative rounded-2xl overflow-hidden border border-purple-800 hover:border-amber-500/50 shadow-2xl">
-                  <img
-                    src={cat.image}
-                    alt={TEXTS[cat.title_key || cat.titleKey]?.[lang] || cat.id}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale-[30%] group-hover:grayscale-0"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#1a0b2e]/90 via-transparent to-transparent opacity-90 transition-opacity duration-300" />
-                  <div className="absolute bottom-0 left-0 w-full p-8 text-center transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                    <h3 className="text-3xl font-serif text-amber-100 mb-2">
-                      {TEXTS[cat.title_key || cat.titleKey]?.[lang] || cat.id}
-                    </h3>
-                    <span className="text-amber-500 text-sm uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
-                      {TEXTS.cta_explore[lang]} <ChevronRight size={14} />
-                    </span>
-                  </div>
-                </ThreeDCard>
+          <>
+            {usages.length > 0 && (
+              <div className="mb-8 flex flex-wrap gap-3 justify-center">
+                {usages.map((u) => (
+                  <button
+                    key={u.key}
+                    onClick={() => {
+                      setActiveCategory?.(null);
+                      setActiveUsage?.(u.key);
+                      if (handleSubMenuClick) handleSubMenuClick(u.key);
+                      else
+                        router.push(
+                          `/products?usage=${encodeURIComponent(u.key)}`
+                        );
+                    }}
+                    className="px-4 py-2 bg-[#1a0b2e]/70 border border-purple-700 rounded text-purple-200 text-sm hover:bg-amber-500/10">
+                    {u.label || u.key}
+                  </button>
+                ))}
               </div>
-            ))}
-          </div>
+            )}
+            <div className="grid md:grid-cols-3 gap-8">
+              {categories.map((cat: any) => (
+                <div
+                  key={cat.id}
+                  onClick={() => setActiveCategory?.(cat.id)}
+                  className="cursor-pointer">
+                  <ThreeDCard className="group h-96 relative rounded-2xl overflow-hidden border border-purple-800 hover:border-amber-500/50 shadow-2xl">
+                    <img
+                      src={cat.image}
+                      alt={
+                        TEXTS[cat.title_key || cat.titleKey]?.[lang] || cat.id
+                      }
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale-[30%] group-hover:grayscale-0"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#1a0b2e]/90 via-transparent to-transparent opacity-90 transition-opacity duration-300" />
+                    <div className="absolute bottom-0 left-0 w-full p-8 text-center transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                      <h3 className="text-3xl font-serif text-amber-100 mb-2">
+                        {TEXTS[cat.title_key || cat.titleKey]?.[lang] || cat.id}
+                      </h3>
+                      <span className="text-amber-500 text-sm uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
+                        {TEXTS.cta_explore[lang]} <ChevronRight size={14} />
+                      </span>
+                    </div>
+                  </ThreeDCard>
+                </div>
+              ))}
+            </div>
+          </>
         )}
 
         {(activeCategory || activeUsage) && (

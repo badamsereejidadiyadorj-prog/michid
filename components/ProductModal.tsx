@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { Check, Share2, X, Info, Star } from "lucide-react";
 import { TEXTS } from "../lib/data";
+import { useCart } from "./CartContext";
 
 export default function ProductModal({
   lang,
@@ -13,6 +14,25 @@ export default function ProductModal({
   shareFeedback,
 }: any) {
   if (!selectedProduct) return null;
+  const { add } = useCart();
+  const [added, setAdded] = useState(false);
+
+  const handleAddToCart = () => {
+    try {
+      const priceRaw = (selectedProduct.price || "").toString();
+      const priceNum = Number(priceRaw.replace(/[^0-9]/g, "")) || 0;
+      add({
+        id: selectedProduct.id,
+        title: selectedProduct.title,
+        price: priceNum,
+        quantity: 1,
+        image: selectedProduct.image,
+      });
+      setAdded(true);
+    } catch (e) {
+      console.warn("Failed to add to cart", e);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
@@ -166,8 +186,13 @@ export default function ProductModal({
             </div>
           )}
 
-          <button className="mt-auto w-full py-4 bg-amber-500 hover:bg-amber-400 text-[#1a0b2e] font-bold uppercase tracking-widest transition-colors shadow-[0_0_20px_rgba(212,175,55,0.3)]">
-            Contact to Order
+          <button
+            onClick={handleAddToCart}
+            disabled={added}
+            className={`mt-auto w-full py-4 ${
+              added ? "bg-amber-300/60" : "bg-amber-500 hover:bg-amber-400"
+            } text-[#1a0b2e] font-bold uppercase tracking-widest transition-colors shadow-[0_0_20px_rgba(212,175,55,0.3)]`}>
+            {added ? "Сагсанд нэмэгдсэн" : "Сагсанд нэмэх"}
           </button>
         </div>
       </div>

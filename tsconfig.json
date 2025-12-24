@@ -23,7 +23,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx"
-  ],
+, "lib/supabaseServer.js", "scripts/seed-admin.mjs"  ],
   "exclude": [
     "node_modules"
   ]

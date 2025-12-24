@@ -5,6 +5,7 @@ import ProductModal from "../components/ProductModal";
 import Nav from "../components/Nav";
 import SiteFooter from "../components/SiteFooter";
 import SocialSidebar from "../components/SocialSidebar";
+import { useRouter } from "next/router";
 
 export default function ProductsPage() {
   const [lang, setLang] = useState("mn");
@@ -34,6 +35,24 @@ export default function ProductsPage() {
       }
     })();
   }, []);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!router.isReady) return;
+    const q = router.query.usage as string | undefined;
+    if (q) setUsage(q);
+  }, [router.isReady, router.query.usage]);
+
+  // keep URL in sync when usage state changes via UI
+  useEffect(() => {
+    if (!router.isReady) return;
+    const params = new URLSearchParams(window.location.search);
+    if (usage) params.set("usage", usage);
+    else params.delete("usage");
+    const url = `${window.location.pathname}?${params.toString()}`;
+    router.replace(url, undefined, { shallow: true });
+  }, [usage]);
 
   const filtered = useMemo(() => {
     return products.filter((p) => {

@@ -20,19 +20,6 @@ export default function AdminUsages() {
     return () => listener?.subscription.unsubscribe();
   }, []);
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-[#0f0518] text-[#F5F5DC]">
-        <Nav lang={"mn"} setLang={() => {}} onSubmenu={() => {}} />
-        <main className="container mx-auto px-6 py-20 text-center">
-          <div className="bg-[#140824] p-8 rounded border border-purple-800 inline-block">
-            You must sign in via /admin to access this page.
-          </div>
-        </main>
-      </div>
-    );
-  }
-
   useEffect(() => {
     (async () => {
       try {
@@ -71,6 +58,18 @@ export default function AdminUsages() {
       setItems((s) => s.filter((x) => x !== v));
     } catch (e) {}
   };
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-[#0f0518] text-[#F5F5DC]">
+        <Nav lang={"mn"} setLang={() => {}} onSubmenu={() => {}} />
+        <main className="container mx-auto px-6 py-20 text-center">
+          <div className="bg-[#140824] p-8 rounded border border-purple-800 inline-block">
+            You must sign in via /admin to access this page.
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0f0518] text-[#F5F5DC]">

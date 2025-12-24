@@ -128,10 +128,10 @@ export default function AdminIndex() {
     <div className="min-h-screen bg-[#0f0518] text-[#F5F5DC]">
       <Nav lang={"mn"} setLang={() => {}} onSubmenu={() => {}} />
 
-      <main className="container mx-auto px-6 py-20 relative">
+      <main className="container mx-auto min-h-screen pt-20 px-6 py-20 relative">
         {!user && (
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-40 flex items-center justify-center">
-            <div className="bg-[#140824] p-8 rounded-lg w-full max-w-md border border-purple-800">
+          <div className="absolute inset-0 top-1/2 -translate-y-1/2 bg-black/60 backdrop-blur-sm z-40 flex items-center justify-center">
+            <div className="bg-[#140824]  p-8 rounded-lg w-full max-w-md border border-purple-800">
               <h2 className="text-xl font-serif text-amber-300 mb-4">
                 Admin Login
               </h2>

@@ -4,6 +4,10 @@ import { supabase } from "../../lib/supabaseClient";
 
 export default function AdminCategories() {
   const [user, setUser] = useState<any>(null);
+  const [cats, setCats] = useState<any[]>([]);
+  const [title, setTitle] = useState("");
+  const [fileUploading, setFileUploading] = useState(false);
+  const [imagePath, setImagePath] = useState<string | null>(null);
   useEffect(() => {
     (async () => {
       const { data } = await supabase.auth.getSession();
@@ -16,23 +20,6 @@ export default function AdminCategories() {
     );
     return () => listener?.subscription.unsubscribe();
   }, []);
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-[#0f0518] text-[#F5F5DC]">
-        <Nav lang={"mn"} setLang={() => {}} onSubmenu={() => {}} />
-        <main className="container mx-auto px-6 py-20 text-center">
-          <div className="bg-[#140824] p-8 rounded border border-purple-800 inline-block">
-            You must sign in via /admin to access this page.
-          </div>
-        </main>
-      </div>
-    );
-  }
-  const [cats, setCats] = useState<any[]>([]);
-  const [title, setTitle] = useState("");
-  const [fileUploading, setFileUploading] = useState(false);
-  const [imagePath, setImagePath] = useState<string | null>(null);
 
   useEffect(() => {
     // fetch from server API
@@ -84,11 +71,22 @@ export default function AdminCategories() {
       });
     } catch (e) {}
   };
-
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-[#0f0518] text-[#F5F5DC]">
+        <Nav lang={"mn"} setLang={() => {}} onSubmenu={() => {}} />
+        <main className="container mx-auto px-6 py-20 text-center">
+          <div className="bg-[#140824] p-8 rounded border border-purple-800 inline-block">
+            You must sign in via /admin to access this page.
+          </div>
+        </main>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-[#0f0518] text-[#F5F5DC]">
       <Nav lang={"mn"} setLang={() => {}} onSubmenu={() => {}} />
-      <main className="container mx-auto px-6 py-12">
+      <main className="container  pt-20 mx-auto px-6 py-12">
         <h2 className="text-2xl font-serif text-amber-400 mb-4">
           Manage Categories
         </h2>
