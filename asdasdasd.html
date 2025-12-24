@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="mn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MICHID - Luxury Mongolian Fashion</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <!-- Babel for in-browser JSX compilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+      :root {
+        --color-primary: #1a0b2e; /* Deep Royal Purple */
+        --color-gold: #D4AF37;    /* Metallic Gold */
+        --color-cream: #F5F5DC;   /* Cream */
+      }
+      body {
+        font-family: 'Lato', sans-serif;
+        background-color: var(--color-primary);
+        color: var(--color-cream);
+        overflow-x: hidden;
+      }
+      h1, h2, h3, h4, h5, h6, .font-serif {
+        font-family: 'Cinzel', serif;
+      }
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #1a0b2e;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #D4AF37;
+        border-radius: 4px;
+      }
+      .gold-glow {
+        text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+      }
+      .transform-style-3d {
+        transform-style: preserve-3d;
+      }
+      
+      /* Infinite Scroll Animation */
+      @keyframes scroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+      }
+      .animate-scroll {
+        animation: scroll 40s linear infinite;
+      }
+      .animate-scroll:hover {
+        animation-play-state: paused;
+      }
+      
+      @keyframes fade-in-up {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in-up {
+        animation: fade-in-up 0.5s ease-out forwards;
+      }
+      
+      @keyframes scale-in {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+      }
+      .animate-scale-in {
+        animation: scale-in 0.3s ease-out forwards;
+      }
+    </style>
+
+    <!-- Import Map for React and Modules -->
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+        "lucide-react": "https://esm.sh/lucide-react@0.263.1"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <!-- Main Application Script -->
+    <script type="text/babel" data-type="module">
+      import React, { useState, useEffect, useRef } from 'react';
+      import ReactDOM from 'react-dom/client';
+      import { 
+        Facebook, Instagram, Twitter, Mail, Globe, Menu, X, ChevronRight, 
+        Star, ArrowLeft, ZoomIn, Info, Share2, Check, Play, ChevronDown 
+      } from 'lucide-react';
+
+      // ==========================================
+      // 1. DATA & CONSTANTS
+      // ==========================================
+      
+      const TEXTS = {
+        nav_home: { mn: 'Нүүр', en: 'Home', de: 'Startseite' },
+        nav_collection: { mn: 'Коллекц', en: 'Collection', de: 'Kollektion' },
+        nav_gallery: { mn: 'Олны танил', en: 'Showcase', de: 'Galerie' },
+        nav_clients: { mn: 'Харилцагчид', en: 'Partners', de: 'Partner' },
+        nav_about: { mn: 'Бидний тухай', en: 'About Us', de: 'Über Uns' },
+        nav_contact: { mn: 'Холбоо барих', en: 'Contact', de: 'Kontakt' },
+        hero_title: { mn: 'Уламжлал ба Тансаг зэрэглэл', en: 'Tradition Meets Luxury', de: 'Tradition trifft Luxus' },
+        hero_subtitle: { mn: 'Хүннү захтай дээлний дээд зэрэглэлийн урлал', en: 'Exquisite Hunnu Collar Craftsmanship', de: 'Exquisite Hunnu-Kragen-Handwerkskunst' },
+        cta_explore: { mn: 'Дэлгэрэнгүй', en: 'Explore', de: 'Entdecken' },
+        latest_work: { mn: 'Онцлох Загварууд', en: 'Featured Collections', de: 'Ausgewählte Kollektionen' },
+        footer_text: { mn: '© 2024 МИЧИД Брэнд. Бүх эрх хуулиар хамгаалагдсан.', en: '© 2024 MICHID Brand. All Rights Reserved.', de: '© 2024 MICHID Marke. Alle Rechte vorbehalten.' },
+        back: { mn: 'Буцах', en: 'Back', de: 'Zurück' },
+        view_details: { mn: 'Дэлгэрэнгүй харах', en: 'View Details', de: 'Details anzeigen' },
+        category_men: { mn: 'Эрэгтэй', en: 'Men', de: 'Herren' },
+        category_women: { mn: 'Эмэгтэй', en: 'Women', de: 'Damen' },
+        category_acc: { mn: 'Хүүхэд & Гоёл', en: 'Kids & Accessories', de: 'Kinder & Zubehör' },
+        details_material: { mn: 'Материал', en: 'Material', de: 'Material' },
+        details_origin: { mn: 'Үйлдвэрлэл', en: 'Origin', de: 'Herkunft' },
+        share: { mn: 'Хуваалцах', en: 'Share', de: 'Teilen' },
+        link_copied: { mn: 'Холбоос хуулагдлаа!', en: 'Link Copied!', de: 'Link kopiert!' },
+        related_products: { mn: 'Төстэй загварууд', en: 'Related Products', de: 'Ähnliche Produkte' },
+        gallery_title: { mn: 'Олны Танил Эрхмүүд', en: 'As Seen On', de: 'Gesehen Bei' },
+        clients_title: { mn: 'Бидний Харилцагчид', en: 'Our Partners', de: 'Unsere Partner' },
+        submenu_ceremonial: { mn: 'Ёслолын', en: 'Ceremonial', de: 'Zeremoniell' },
+        submenu_everyday: { mn: 'Өдөр тутмын', en: 'Everyday', de: 'Alltag' },
+        submenu_winter: { mn: 'Өвлийн', en: 'Winter', de: 'Winter' },
+      };
+
+      const CATEGORIES = [
+        { id: 'women', titleKey: 'category_women', image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop' },
+        { id: 'men', titleKey: 'category_men', image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=800&auto=format&fit=crop' },
+        { id: 'kids', titleKey: 'category_acc', image: 'https://images.unsplash.com/photo-1503919545885-7f4941199540?q=80&w=800&auto=format&fit=crop' },
+      ];
+
+      const PRODUCTS = [
+        { 
+          id: 1, 
+          categoryId: 'men',
+          title: 'Midnight Hunnu', 
+          description: 'Deep blue silk with gold embroidery.', 
+          image: 'https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?q=80&w=800&auto=format&fit=crop', 
+          images: [
+            'https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?q=80&w=800&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1515664069236-68a74c369d97?q=80&w=800&auto=format&fit=crop',
+          ],
+          price: '₮1,200,000',
+          material: '100% Mongolian Silk, Gold Thread',
+          origin: 'Handcrafted in Ulaanbaatar',
+          features: ['Traditional Hunnu Collar', 'Double stitching', 'Silk lining'],
+          usage: 'ceremonial'
+        },
+        { 
+          id: 2, 
+          categoryId: 'women',
+          title: 'Royal Crimson', 
+          description: 'Traditional red with modern cuts.', 
+          image: 'https://images.unsplash.com/photo-1566174053879-31528523f8ae?q=80&w=800&auto=format&fit=crop', 
+          images: [
+            'https://images.unsplash.com/photo-1566174053879-31528523f8ae?q=80&w=800&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1589465885857-44edb59ef523?q=80&w=800&auto=format&fit=crop'
+          ],
+          price: '₮1,500,000',
+          material: 'Premium Cashmere & Silk Blend',
+          origin: 'Designed by Michid Studio',
+          features: ['Embroidery accents', 'Fitted waist', 'Ceremonial grade'],
+          usage: 'ceremonial'
+        },
+        { 
+          id: 3, 
+          categoryId: 'women',
+          title: 'Ivory Elegance', 
+          description: 'Pure white cashmere blend.', 
+          image: 'https://images.unsplash.com/photo-1548883354-94bcfe321cbb?q=80&w=800&auto=format&fit=crop', 
+          images: [
+            'https://images.unsplash.com/photo-1548883354-94bcfe321cbb?q=80&w=800&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1620898516104-c3c2710668f4?q=80&w=800&auto=format&fit=crop'
+          ],
+          price: '₮1,800,000',
+          material: 'Pure Organic Cashmere',
+          origin: 'Sourced from Gobi Desert',
+          features: ['Winter ready', 'Soft touch finish', 'Pearl buttons'],
+          usage: 'winter'
+        },
+         { 
+          id: 4, 
+          categoryId: 'men',
+          title: 'Warrior\'s Tunic', 
+          description: 'Robust fabric for everyday elegance.', 
+          image: 'https://images.unsplash.com/photo-1507680434567-d47775128624?q=80&w=800&auto=format&fit=crop',
+          images: [
+            'https://images.unsplash.com/photo-1507680434567-d47775128624?q=80&w=800&auto=format&fit=crop',
+          ], 
+          price: '₮900,000',
+          material: 'Durable Wool Blend',
+          origin: 'Michid Workshop',
+          features: ['Modern cut', 'Breathable', 'Deep pockets'],
+          usage: 'everyday'
+        },
+        { 
+          id: 5, 
+          categoryId: 'kids',
+          title: 'Little Prince', 
+          description: 'Ceremonial wear for children.', 
+          image: 'https://images.unsplash.com/photo-1519457431-44ccd64a579b?q=80&w=800&auto=format&fit=crop',
+          images: [
+            'https://images.unsplash.com/photo-1519457431-44ccd64a579b?q=80&w=800&auto=format&fit=crop',
+          ], 
+          price: '₮450,000',
+          material: 'Soft Cotton & Silk',
+          origin: 'Handmade',
+          features: ['Adjustable size', 'Bright colors', 'Easy care'],
+          usage: 'ceremonial'
+        },
+        { 
+          id: 6, 
+          categoryId: 'women',
+          title: 'Amethyst Dream', 
+          description: 'A luxurious purple silk deel for evening wear.', 
+          image: 'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?q=80&w=800&auto=format&fit=crop', 
+          images: [
+             'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?q=80&w=800&auto=format&fit=crop'
+          ],
+          price: '₮1,600,000',
+          material: '100% Silk',
+          origin: 'Ulaanbaatar Studio',
+          features: ['Purple Hue', 'Silk Sash', 'Evening Wear'],
+          usage: 'ceremonial'
+        },
+      ];
+
+      const CELEBRITIES = [
+        { id: 1, name: 'Singer Nara', type: 'photo', image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop' },
+        { id: 2, name: 'Actor Bold', type: 'video', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=600&auto=format&fit=crop' },
+        { id: 3, name: 'Model Sarnai', type: 'photo', image: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=600&auto=format&fit=crop' },
+        { id: 4, name: 'TV Host Tuya', type: 'photo', image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop' },
+      ];
+
+      const CLIENTS = [
+        { id: 1, name: 'GOBI CASHMERE' },
+        { id: 2, name: 'ULAANBAATAR HOTEL' },
+        { id: 3, name: 'MONGOL BANK' },
+        { id: 4, name: 'APU COMPANY' },
+        { id: 5, name: 'MIAT AIRLINES' },
+        { id: 6, name: 'UNITEL GROUP' },
+      ];
+
+      // ==========================================
+      // 2. COMPONENTS
+      // ==========================================
+
+      // ThreeDCard Component
+      const ThreeDCard = ({ children, className = '', onClick }) => {
+        const cardRef = useRef(null);
+        const [rotation, setRotation] = useState({ x: 0, y: 0 });
+        const [isHovering, setIsHovering] = useState(false);
+
+        const handleMouseMove = (e) => {
+          if (!cardRef.current) return;
+          const rect = cardRef.current.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+          const rotateX = ((y - centerY) / centerY) * -10;
+          const rotateY = ((x - centerX) / centerX) * 10;
+          setRotation({ x: rotateX, y: rotateY });
+        };
+
+        const handleMouseEnter = () => setIsHovering(true);
+        const handleMouseLeave = () => {
+          setIsHovering(false);
+          setRotation({ x: 0, y: 0 });
+        };
+
+        return (
+          <div
+            ref={cardRef}
+            onMouseMove={handleMouseMove}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            onClick={onClick}
+            className={`relative transition-transform duration-100 ease-out transform-style-3d ${className}`}
+            style={{
+              transform: `perspective(1000px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) scale3d(${isHovering ? 1.02 : 1}, ${isHovering ? 1.02 : 1}, 1)`,
+            }}
+          >
+            <div 
+              className="absolute inset-0 z-20 pointer-events-none rounded-xl opacity-0 transition-opacity duration-300"
+              style={{
+                  opacity: isHovering ? 0.1 : 0,
+                  background: `linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.8) 45%, rgba(255,255,255,0.1) 50%, transparent 54%)`,
+                  transform: `translateX(${rotation.y * 2}%) translateY(${rotation.x * 2}%)`
+              }}
+            />
+            {children}
+          </div>
+        );
+      };
+
+      // Social Sidebar Component
+      const SocialSidebar = () => (
+        <div className="fixed left-0 top-1/2 -translate-y-1/2 z-40 hidden lg:flex flex-col gap-4 p-4 bg-purple-950/50 backdrop-blur-sm rounded-r-2xl border-y border-r border-amber-500/20 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
+          <a href="#" className="text-purple-300 hover:text-amber-400 hover:scale-110 transition-all duration-300">
+            <Facebook size={24} />
+          </a>
+          <a href="#" className="text-purple-300 hover:text-amber-400 hover:scale-110 transition-all duration-300">
+            <Instagram size={24} />
+          </a>
+          <a href="#" className="text-purple-300 hover:text-amber-400 hover:scale-110 transition-all duration-300">
+            <Twitter size={24} />
+          </a>
+          <div className="w-8 h-[1px] bg-purple-600 mx-auto my-2"></div>
+          <a href="mailto:info@michid.mn" className="text-purple-300 hover:text-amber-400 hover:scale-110 transition-all duration-300">
+            <Mail size={24} />
+          </a>
+        </div>
+      );
+
+      // ==========================================
+      // 3. MAIN APP COMPONENT
+      // ==========================================
+
+      const App = () => {
+        const [lang, setLang] = useState('mn');
+        const [scrolled, setScrolled] = useState(false);
+        const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+        
+        // Navigation State
+        const [activeCategory, setActiveCategory] = useState(null);
+        const [activeUsage, setActiveUsage] = useState(null);
+        const [selectedProduct, setSelectedProduct] = useState(null);
+        const [activeImage, setActiveImage] = useState('');
+        const [shareFeedback, setShareFeedback] = useState(false);
+
+        // Computed Values
+        const relatedProducts = selectedProduct 
+          ? PRODUCTS.filter(p => p.categoryId === selectedProduct.categoryId && p.id !== selectedProduct.id).slice(0, 3)
+          : [];
+
+        useEffect(() => {
+          const handleScroll = () => {
+            setScrolled(window.scrollY > 50);
+          };
+          window.addEventListener('scroll', handleScroll);
+          return () => window.removeEventListener('scroll', handleScroll);
+        }, []);
+
+        const toggleLang = () => {
+          if (lang === 'mn') setLang('en');
+          else if (lang === 'en') setLang('de');
+          else setLang('mn');
+        };
+
+        const handleShare = async () => {
+          if (!selectedProduct) return;
+          
+          const shareData = {
+            title: `MICHID - ${selectedProduct.title}`,
+            text: `Discover ${selectedProduct.title} - Luxury Mongolian Wear by MICHID`,
+            url: window.location.href 
+          };
+
+          if (navigator.share) {
+            try {
+              await navigator.share(shareData);
+            } catch (err) {
+              console.debug('Share cancelled or failed', err);
+            }
+          } else {
+            // Fallback for desktop/browsers without Web Share API
+            navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
+            setShareFeedback(true);
+            setTimeout(() => setShareFeedback(false), 2000);
+          }
+        };
+
+        const handleSubMenuClick = (usage) => {
+          setActiveUsage(usage);
+          setActiveCategory(null);
+          document.getElementById('collection')?.scrollIntoView({behavior: 'smooth'});
+        };
+
+        const filteredProducts = activeCategory 
+          ? PRODUCTS.filter(p => p.categoryId === activeCategory)
+          : activeUsage 
+          ? PRODUCTS.filter(p => p.usage === activeUsage)
+          : [];
+
+        const getText = (key) => {
+          // Safety check
+          if (TEXTS[key] && TEXTS[key][lang]) {
+            return TEXTS[key][lang];
+          }
+          return key;
+        };
+
+        return (
+          <div className="min-h-screen bg-[#1a0b2e] text-[#F5F5DC] selection:bg-amber-500/30 selection:text-amber-200">
+            
+            {/* Navigation */}
+            <nav className={`fixed w-full z-50 transition-all duration-500 ${scrolled ? 'bg-[#1a0b2e]/90 backdrop-blur-lg shadow-2xl py-4' : 'bg-transparent py-8'}`}>
+              <div className="container mx-auto px-6 flex justify-between items-center">
+                {/* Logo */}
+                <div className="flex items-center gap-2 z-50 cursor-pointer" onClick={() => { setActiveCategory(null); setActiveUsage(null); setSelectedProduct(null); window.scrollTo(0,0); }}>
+                   <div className="w-10 h-10 border-2 border-amber-500 rotate-45 flex items-center justify-center shadow-[0_0_15px_rgba(212,175,55,0.4)]">
+                      <div className="w-6 h-6 bg-gradient-to-br from-amber-400 to-amber-600 -rotate-45" />
+                   </div>
+                   <span className="text-2xl font-serif font-bold tracking-[0.2em] text-amber-400 ml-3 drop-shadow-lg">
+                     MICHID
+                   </span>
+                </div>
+
+                {/* Desktop Menu */}
+                <div className="hidden lg:flex items-center gap-6 text-xs xl:text-sm uppercase tracking-widest text-purple-200">
+                  <a href="#home" onClick={() => { setActiveCategory(null); setActiveUsage(null); }} className="hover:text-amber-400 transition-colors">{getText('nav_home')}</a>
+                  
+                  {/* Collection Dropdown */}
+                  <div className="group relative">
+                     <a href="#collection" className="hover:text-amber-400 transition-colors py-4 flex items-center gap-1">
+                       {getText('nav_collection')} <ChevronDown size={12} className="opacity-70 group-hover:rotate-180 transition-transform" />
+                     </a>
+                     <div className="absolute top-full left-1/2 -translate-x-1/2 w-48 bg-[#1a0b2e]/95 backdrop-blur-md border border-amber-500/30 shadow-[0_10px_40px_rgba(0,0,0,0.5)] rounded-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                        <button onClick={() => handleSubMenuClick('ceremonial')} className="w-full text-left px-6 py-3 hover:bg-purple-900/50 hover:text-amber-400 transition-colors border-b border-purple-800/50 last:border-0">
+                          {getText('submenu_ceremonial')}
+                        </button>
+                        <button onClick={() => handleSubMenuClick('everyday')} className="w-full text-left px-6 py-3 hover:bg-purple-900/50 hover:text-amber-400 transition-colors border-b border-purple-800/50 last:border-0">
+                          {getText('submenu_everyday')}
+                        </button>
+                        <button onClick={() => handleSubMenuClick('winter')} className="w-full text-left px-6 py-3 hover:bg-purple-900/50 hover:text-amber-400 transition-colors">
+                          {getText('submenu_winter')}
+                        </button>
+                     </div>
+                  </div>
+
+                  <a href="#gallery" className="hover:text-amber-400 transition-colors">{getText('nav_gallery')}</a>
+                  <a href="#clients" className="hover:text-amber-400 transition-colors">{getText('nav_clients')}</a>
+                  <a href="#about" className="hover:text-amber-400 transition-colors">{getText('nav_about')}</a>
+                  <a href="#contact" className="hover:text-amber-400 transition-colors">{getText('nav_contact')}</a>
+                  
+                  <button 
+                    onClick={toggleLang}
+                    className="flex items-center gap-2 border border-amber-500/30 px-3 py-1.5 rounded-full hover:bg-amber-500/10 transition-colors ml-4"
+                  >
+                    <Globe size={14} className="text-amber-500" />
+                    <span className="font-bold text-amber-500">{lang.toUpperCase()}</span>
+                  </button>
+                </div>
+
+                {/* Mobile Menu Button */}
+                <button 
+                  className="lg:hidden z-50 text-amber-400"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                >
+                  {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+                </button>
+              </div>
+
+              {/* Mobile Menu Overlay */}
+              {mobileMenuOpen && (
+                <div className="fixed inset-0 bg-[#1a0b2e] z-40 flex flex-col items-center justify-center gap-8 text-xl font-serif">
+                  <a href="#home" onClick={() => { setMobileMenuOpen(false); setActiveCategory(null); setActiveUsage(null); }}>{getText('nav_home')}</a>
+                  <a href="#collection" onClick={() => setMobileMenuOpen(false)}>{getText('nav_collection')}</a>
+                  {/* Mobile Submenu Items */}
+                  <div className="flex flex-col gap-4 items-center text-sm text-purple-300">
+                     <button onClick={() => { handleSubMenuClick('ceremonial'); setMobileMenuOpen(false); }}>- {getText('submenu_ceremonial')} -</button>
+                     <button onClick={() => { handleSubMenuClick('everyday'); setMobileMenuOpen(false); }}>- {getText('submenu_everyday')} -</button>
+                     <button onClick={() => { handleSubMenuClick('winter'); setMobileMenuOpen(false); }}>- {getText('submenu_winter')} -</button>
+                  </div>
+                  <a href="#gallery" onClick={() => setMobileMenuOpen(false)}>{getText('nav_gallery')}</a>
+                  <a href="#clients" onClick={() => setMobileMenuOpen(false)}>{getText('nav_clients')}</a>
+                  <a href="#about" onClick={() => setMobileMenuOpen(false)}>{getText('nav_about')}</a>
+                  <button onClick={toggleLang} className="text-amber-500 flex items-center gap-2">
+                    <Globe size={20} /> {lang.toUpperCase()}
+                  </button>
+                </div>
+              )}
+            </nav>
+
+            {/* Social Sidebar */}
+            <SocialSidebar />
+
+            {/* Hero Section with Purple/Gold Theme */}
+            <section id="home" className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+              {/* Background Gradients */}
+              <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(60,20,90,0.4)_0%,rgba(26,11,46,1)_100%)] z-0"></div>
+              <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[100px] animate-pulse"></div>
+              <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-amber-600/10 rounded-full blur-[100px]"></div>
+
+              <div className="container mx-auto px-6 relative z-10 grid md:grid-cols-2 gap-12 items-center">
+                
+                <div className="space-y-8 text-center md:text-left">
+                   <div className="inline-block px-4 py-1 border border-amber-500/30 rounded-full text-amber-500 text-xs tracking-[0.3em] uppercase mb-4 bg-purple-900/20 backdrop-blur">
+                     Since 2024
+                   </div>
+                   <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-bold leading-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-purple-200 gold-glow">
+                     {getText('hero_title')}
+                   </h1>
+                   <p className="text-lg md:text-xl text-purple-200/70 font-light max-w-lg mx-auto md:mx-0 border-l-2 border-amber-500 pl-6">
+                     {getText('hero_subtitle')}
+                   </p>
+                   <button onClick={() => document.getElementById('collection')?.scrollIntoView({behavior: 'smooth'})} className="group relative px-8 py-4 bg-transparent border border-amber-500 text-amber-500 uppercase tracking-widest text-sm hover:bg-amber-500 hover:text-[#1a0b2e] transition-all duration-300">
+                     <span className="flex items-center gap-2">
+                       {getText('cta_explore')} <ChevronRight className="group-hover:translate-x-1 transition-transform" />
+                     </span>
+                     <div className="absolute -inset-1 bg-amber-500/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                   </button>
+                </div>
+
+                {/* 3D Hero Image */}
+                <div className="relative flex justify-center items-center">
+                  <div className="absolute w-[500px] h-[500px] border border-purple-500/20 rounded-full animate-[spin_20s_linear_infinite]"></div>
+                  <div className="absolute w-[400px] h-[400px] border border-amber-500/30 rounded-full animate-[spin_15s_linear_infinite_reverse]"></div>
+                  
+                  <ThreeDCard className="w-[300px] h-[450px] md:w-[400px] md:h-[600px] rounded-t-[100px] rounded-b-2xl overflow-hidden shadow-[0_20px_60px_rgba(40,10,70,0.6)] border border-amber-500/20 bg-[#1a0b2e]">
+                    <img 
+                      src="https://images.unsplash.com/photo-1552874869-5c39ec9288dc?q=80&w=800&auto=format&fit=crop" 
+                      alt="Michid Hero Product" 
+                      className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity duration-500 hover:scale-110" 
+                    />
+                    <div className="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-[#1a0b2e] to-transparent">
+                       <h3 className="text-2xl font-serif text-amber-100">Royal Collection</h3>
+                       <p className="text-amber-500 text-sm">Limited Edition</p>
+                    </div>
+                  </ThreeDCard>
+                </div>
+              </div>
+            </section>
+
+            {/* Collection Section */}
+            <section id="collection" className="py-20 bg-[#140824] relative">
+              <div className="absolute top-0 w-full h-24 bg-gradient-to-b from-[#1a0b2e] to-transparent"></div>
+              
+              <div className="container mx-auto px-6 relative z-10">
+                <div className="text-center mb-16">
+                   <h2 className="text-4xl md:text-5xl font-serif text-amber-100 mb-4">{getText('latest_work')}</h2>
+                  <div className="w-24 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent mx-auto"></div>
+                </div>
+
+                {/* VIEW: CATEGORIES */}
+                {!activeCategory && !activeUsage && (
+                  <div className="grid md:grid-cols-3 gap-8">
+                    {CATEGORIES.map((cat) => (
+                      <div key={cat.id} onClick={() => setActiveCategory(cat.id)} className="cursor-pointer">
+                        <ThreeDCard className="group h-96 relative rounded-2xl overflow-hidden border border-purple-800 hover:border-amber-500/50 shadow-2xl">
+                          <img src={cat.image} alt={TEXTS[cat.titleKey][lang]} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale-[30%] group-hover:grayscale-0" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#1a0b2e]/90 via-transparent to-transparent opacity-90 transition-opacity duration-300"></div>
+                          <div className="absolute bottom-0 left-0 w-full p-8 text-center transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                            <h3 className="text-3xl font-serif text-amber-100 mb-2">{TEXTS[cat.titleKey][lang]}</h3>
+                            <span className="text-amber-500 text-sm uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
+                               {getText('cta_explore')} <ChevronRight size={14} />
+                            </span>
+                          </div>
+                        </ThreeDCard>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* VIEW: PRODUCTS LIST */}
+                {(activeCategory || activeUsage) && (
+                   <div className="animate-fade-in-up">
+                      <button 
+                        onClick={() => { setActiveCategory(null); setActiveUsage(null); }}
+                        className="mb-8 flex items-center gap-2 text-purple-300 hover:text-amber-400 transition-colors uppercase tracking-widest text-sm"
+                      >
+                         <ArrowLeft size={18} /> {getText('back')}
+                      </button>
+                      
+                      <h3 className="text-2xl font-serif text-white mb-8 border-l-4 border-amber-500 pl-4">
+                        {activeCategory 
+                          ? TEXTS[CATEGORIES.find(c => c.id === activeCategory)?.titleKey][lang]
+                          : TEXTS[`submenu_${activeUsage}`]?.[lang]}
+                      </h3>
+
+                      <div className="grid md:grid-cols-3 gap-8">
+                        {filteredProducts.map((product) => (
+                          <div key={product.id} onClick={() => { setSelectedProduct(product); setActiveImage(product.image); }} className="cursor-pointer">
+                            <ThreeDCard className="group bg-[#1a0b2e] rounded-xl overflow-hidden border border-purple-900/50 hover:border-amber-500/50 shadow-xl transition-all duration-300">
+                              <div className="h-96 overflow-hidden relative">
+                                <img src={product.image} alt={product.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                <div className="absolute inset-0 bg-purple-950/20 group-hover:bg-transparent transition-colors"></div>
+                                <div className="absolute top-4 right-4 bg-[#1a0b2e]/80 backdrop-blur text-amber-500 px-3 py-1 rounded-full text-xs border border-amber-500/30 opacity-0 group-hover:opacity-100 transform translate-y-[-10px] group-hover:translate-y-0 transition-all duration-300">
+                                   <ZoomIn size={14} />
+                                </div>
+                              </div>
+                              <div className="p-6 relative bg-gradient-to-b from-[#1a0b2e] to-[#140824]">
+                                <h3 className="text-2xl font-serif text-amber-100 mb-2 group-hover:text-white transition-colors">{product.title}</h3>
+                                <div className="w-10 h-[1px] bg-amber-500/50 mb-4 group-hover:w-20 transition-all"></div>
+                                <p className="text-purple-300 text-sm mb-4 font-light truncate">{product.description}</p>
+                                <div className="flex justify-between items-center pt-2">
+                                  <span className="text-amber-500 font-bold font-serif text-lg">{product.price}</span>
+                                  <button className="text-purple-300 group-hover:text-amber-400 text-xs uppercase tracking-wider flex items-center gap-1 transition-colors">
+                                    {getText('view_details')} <ChevronRight size={14} />
+                                  </button>
+                                </div>
+                              </div>
+                            </ThreeDCard>
+                          </div>
+                        ))}
+                        {filteredProducts.length === 0 && (
+                           <div className="col-span-3 text-center py-20 text-purple-300">
+                              No products found in this category.
+                           </div>
+                        )}
+                      </div>
+                   </div>
+                )}
+              </div>
+            </section>
+
+            {/* Celebrity Showcase Section */}
+            <section id="gallery" className="py-20 bg-[#1a0b2e] relative overflow-hidden">
+               <div className="absolute right-0 top-0 w-1/3 h-full bg-gradient-to-l from-purple-900/20 to-transparent pointer-events-none"></div>
+               
+               <div className="container mx-auto px-6 relative z-10">
+                  <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+                     <div>
+                        <h2 className="text-4xl font-serif text-amber-100 mb-2">{getText('gallery_title')}</h2>
+                        <div className="w-20 h-1 bg-amber-500"></div>
+                     </div>
+                     <div className="flex gap-2">
+                       <button className="w-10 h-10 border border-purple-700 rounded-full flex items-center justify-center text-purple-300 hover:border-amber-500 hover:text-amber-500 transition-colors">
+                          <ArrowLeft size={16} />
+                       </button>
+                       <button className="w-10 h-10 border border-purple-700 rounded-full flex items-center justify-center text-purple-300 hover:border-amber-500 hover:text-amber-500 transition-colors">
+                          <ChevronRight size={16} />
+                       </button>
+                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                     {CELEBRITIES.map((celeb) => (
+                        <div key={celeb.id} className="group relative aspect-[3/4] overflow-hidden rounded-xl cursor-pointer">
+                           <img 
+                             src={celeb.image} 
+                             alt={celeb.name} 
+                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 filter brightness-90 group-hover:brightness-100" 
+                           />
+                           <div className="absolute inset-0 bg-gradient-to-t from-[#1a0b2e] via-transparent to-transparent opacity-80 group-hover:opacity-60 transition-opacity"></div>
+                           
+                           {/* Play Icon if video */}
+                           {celeb.type === 'video' && (
+                              <div className="absolute inset-0 flex items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity scale-90 group-hover:scale-100 duration-300">
+                                 <div className="w-12 h-12 rounded-full bg-amber-500/90 flex items-center justify-center text-[#1a0b2e] shadow-[0_0_20px_rgba(212,175,55,0.6)] animate-pulse">
+                                    <Play size={20} fill="#1a0b2e" />
+                                 </div>
+                              </div>
+                           )}
+
+                           <div className="absolute bottom-0 left-0 w-full p-4 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                              <p className="text-amber-500 text-xs tracking-widest uppercase mb-1 flex items-center gap-1">
+                                 {celeb.type === 'video' ? 'Video' : 'Photo'} 
+                              </p>
+                              <h3 className="text-white font-serif text-lg">{celeb.name}</h3>
+                           </div>
+                        </div>
+                     ))}
+                  </div>
+               </div>
+            </section>
+
+            {/* About / Craftsmanship Section */}
+            <section id="about" className="py-20 relative overflow-hidden bg-[#140824]">
+              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')] opacity-10 mix-blend-overlay"></div>
+              <div className="container mx-auto px-6 grid md:grid-cols-2 gap-16 items-center relative z-10">
+                 <div className="order-2 md:order-1">
+                    <ThreeDCard className="w-full h-[500px] rounded-2xl overflow-hidden border border-amber-500/20 shadow-[0_0_40px_rgba(124,58,237,0.15)]">
+                      <img src="https://images.unsplash.com/photo-1548883354-94bcfe321cbb?q=80&w=800&auto=format&fit=crop" alt="Craftsmanship" className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000" />
+                    </ThreeDCard>
+                 </div>
+                 <div className="order-1 md:order-2 space-y-6">
+                    <h2 className="text-4xl font-serif text-amber-100">{getText('nav_about')}</h2>
+                    <div className="w-20 h-1 bg-amber-500"></div>
+                    <p className="text-purple-200/80 leading-relaxed font-light text-lg">
+                      The Michid brand revives the ancient elegance of the Hunnu Empire. Our Deels are not just garments; they are a testament to Mongolian heritage, stitched with precision and adorned with patterns that tell stories of the night sky and the eternal blue heaven.
+                    </p>
+                    <div className="grid grid-cols-2 gap-4 mt-8">
+                      <div className="p-4 border border-amber-500/20 bg-purple-900/20 rounded-lg hover:bg-purple-900/30 transition-colors">
+                        <Star className="text-amber-500 mb-2" />
+                        <h4 className="font-serif text-amber-100">Premium Silk</h4>
+                      </div>
+                      <div className="p-4 border border-amber-500/20 bg-purple-900/20 rounded-lg hover:bg-purple-900/30 transition-colors">
+                        <Star className="text-amber-500 mb-2" />
+                        <h4 className="font-serif text-amber-100">Hand Stitched</h4>
+                      </div>
+                    </div>
+                 </div>
+              </div>
+            </section>
+
+            {/* Partners / Clients Section (Scrolling) */}
+            <section id="clients" className="py-12 bg-[#1a0b2e] border-t border-purple-900/30 overflow-hidden relative">
+               <div className="container mx-auto px-6 mb-8 text-center">
+                  <h3 className="text-sm font-serif text-purple-300 uppercase tracking-[0.2em]">{getText('clients_title')}</h3>
+               </div>
+               
+               <div className="relative w-full overflow-hidden flex">
+                  <div className="flex animate-scroll whitespace-nowrap gap-16 min-w-full items-center">
+                     {[...CLIENTS, ...CLIENTS].map((client, idx) => (
+                        <div key={idx} className="flex-shrink-0 group cursor-pointer">
+                           <span className="text-2xl md:text-3xl font-serif text-purple-800 group-hover:text-amber-500/80 transition-colors duration-500 select-none font-bold">
+                             {client.name}
+                           </span>
+                        </div>
+                     ))}
+                     {[...CLIENTS, ...CLIENTS].map((client, idx) => (
+                        <div key={`dup-${idx}`} className="flex-shrink-0 group cursor-pointer">
+                           <span className="text-2xl md:text-3xl font-serif text-purple-800 group-hover:text-amber-500/80 transition-colors duration-500 select-none font-bold">
+                             {client.name}
+                           </span>
+                        </div>
+                     ))}
+                  </div>
+                  <div className="absolute top-0 left-0 w-20 h-full bg-gradient-to-r from-[#1a0b2e] to-transparent z-10"></div>
+                  <div className="absolute top-0 right-0 w-20 h-full bg-gradient-to-l from-[#1a0b2e] to-transparent z-10"></div>
+               </div>
+            </section>
+
+            {/* Footer */}
+            <footer className="bg-[#0f0518] border-t border-purple-900/50 py-12">
+              <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+                 <div className="flex items-center gap-2">
+                   <div className="w-6 h-6 border border-amber-500 rotate-45 flex items-center justify-center">
+                      <div className="w-3 h-3 bg-amber-500 -rotate-45" />
+                   </div>
+                   <span className="text-lg font-serif font-bold tracking-[0.2em] text-purple-400">MICHID</span>
+                 </div>
+                 
+                 <div className="text-purple-400/60 text-sm">
+                   {getText('footer_text')}
+                 </div>
+
+                 <div className="flex gap-6 lg:hidden">
+                    <Facebook className="text-purple-400 hover:text-amber-500" size={20} />
+                    <Instagram className="text-purple-400 hover:text-amber-500" size={20} />
+                 </div>
+              </div>
+            </footer>
+
+            {/* Product Detail Modal */}
+            {selectedProduct && (
+              <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                <div className="absolute inset-0 bg-[#0f0518]/90 backdrop-blur-sm" onClick={() => setSelectedProduct(null)}></div>
+                
+                <div className="relative bg-[#1a0b2e] w-full max-w-5xl rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(124,58,237,0.2)] border border-amber-500/20 flex flex-col md:flex-row animate-scale-in max-h-[90vh]">
+                   
+                   {/* Header Controls */}
+                   <div className="absolute top-4 right-4 z-10 flex gap-3">
+                     <button 
+                       onClick={handleShare}
+                       className="p-2 bg-black/20 hover:bg-amber-500 rounded-full text-white transition-all duration-300 relative group"
+                       title={getText('share')}
+                     >
+                       {shareFeedback ? <Check size={24} /> : <Share2 size={24} />}
+                       {shareFeedback && (
+                         <span className="absolute top-full right-0 mt-2 text-xs bg-amber-500 text-[#1a0b2e] px-2 py-1 rounded whitespace-nowrap font-bold animate-fade-in-up">
+                           {getText('link_copied')}
+                         </span>
+                       )}
+                     </button>
+                     <button 
+                       onClick={() => setSelectedProduct(null)}
+                       className="p-2 bg-black/20 hover:bg-amber-500 rounded-full text-white transition-colors"
+                     >
+                       <X size={24} />
+                     </button>
+                   </div>
+                   
+                   {/* Left: Image Gallery */}
+                   <div className="w-full md:w-1/2 min-h-[40vh] md:h-auto relative bg-black group shrink-0">
+                      <div className="w-full h-full relative overflow-hidden">
+                         <img 
+                           src={activeImage || selectedProduct.image} 
+                           alt={selectedProduct.title} 
+                           className="w-full h-full object-cover transition-all duration-500" 
+                         />
+                         <div className="absolute inset-0 bg-gradient-to-t from-[#1a0b2e] to-transparent opacity-30 md:opacity-0"></div>
+                      </div>
+
+                      {(selectedProduct.images || [selectedProduct.image]).length > 1 && (
+                        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 px-4 z-10">
+                          {(selectedProduct.images || [selectedProduct.image]).map((img, index) => (
+                            <button
+                              key={index}
+                              onClick={() => setActiveImage(img)}
+                              className={`w-14 h-14 md:w-16 md:h-16 rounded-lg overflow-hidden border-2 transition-all duration-300 shadow-lg ${
+                                activeImage === img 
+                                  ? 'border-amber-500 scale-110 shadow-[0_0_15px_rgba(212,175,55,0.5)]' 
+                                  : 'border-white/20 hover:border-white/50 opacity-70 hover:opacity-100'
+                              }`}
+                            >
+                              <img src={img} alt={`Thumbnail ${index}`} className="w-full h-full object-cover" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                   </div>
+
+                   {/* Right: Details (Scrollable) */}
+                   <div className="w-full md:w-1/2 p-8 md:p-10 flex flex-col bg-gradient-to-br from-[#1a0b2e] to-[#2e1065] overflow-y-auto">
+                      <h2 className="text-3xl md:text-4xl font-serif text-amber-100 mb-2">{selectedProduct.title}</h2>
+                      <div className="flex items-center gap-2 mb-6">
+                         <div className="h-[1px] w-12 bg-amber-500"></div>
+                         <span className="text-amber-500 font-serif text-xl">{selectedProduct.price}</span>
+                      </div>
+
+                      <p className="text-purple-200/80 leading-relaxed mb-8 font-light">
+                         {selectedProduct.description}
+                      </p>
+
+                      <div className="grid grid-cols-1 gap-6 mb-8">
+                         <div className="bg-purple-900/20 p-4 rounded-lg border border-purple-500/20 flex items-start gap-4">
+                            <div className="p-2 bg-amber-500/10 rounded-full text-amber-500 mt-1">
+                              <Info size={20} />
+                            </div>
+                            <div>
+                              <h4 className="text-amber-100 font-serif text-sm uppercase tracking-wide mb-1">{getText('details_material')}</h4>
+                              <p className="text-purple-200 text-sm">{selectedProduct.material}</p>
+                            </div>
+                         </div>
+                         <div className="bg-purple-900/20 p-4 rounded-lg border border-purple-500/20 flex items-start gap-4">
+                            <div className="p-2 bg-amber-500/10 rounded-full text-amber-500 mt-1">
+                              <Star size={20} />
+                            </div>
+                            <div>
+                              <h4 className="text-amber-100 font-serif text-sm uppercase tracking-wide mb-1">{getText('details_origin')}</h4>
+                              <p className="text-purple-200 text-sm">{selectedProduct.origin}</p>
+                            </div>
+                         </div>
+                      </div>
+
+                      {selectedProduct.features && (
+                        <div className="flex flex-wrap gap-2 mb-8">
+                          {selectedProduct.features.map((feature, idx) => (
+                            <span key={idx} className="px-3 py-1 bg-purple-950 border border-purple-700 rounded-full text-xs text-purple-300">
+                              {feature}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Related Products Section */}
+                      {relatedProducts.length > 0 && (
+                        <div className="mb-8">
+                          <h4 className="text-amber-500 font-serif text-sm uppercase tracking-wide mb-3 flex items-center gap-2">
+                            {getText('related_products')} <div className="h-px flex-1 bg-purple-800"></div>
+                          </h4>
+                          <div className="grid grid-cols-3 gap-3">
+                            {relatedProducts.map((rp) => (
+                              <div 
+                                key={rp.id} 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedProduct(rp);
+                                  setActiveImage(rp.image);
+                                  const rightPanel = e.currentTarget.closest('.overflow-y-auto');
+                                  if (rightPanel) rightPanel.scrollTop = 0;
+                                }}
+                                className="group cursor-pointer"
+                              >
+                                <div className="aspect-[3/4] rounded bg-purple-900/50 overflow-hidden relative border border-purple-500/20 group-hover:border-amber-500/50 transition-all">
+                                   <img src={rp.image} alt={rp.title} className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" />
+                                </div>
+                                <p className="text-[10px] md:text-xs text-purple-300 mt-1 truncate group-hover:text-amber-400 font-serif">{rp.title}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      <button className="mt-auto w-full py-4 bg-amber-500 hover:bg-amber-400 text-[#1a0b2e] font-bold uppercase tracking-widest transition-colors shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+                        Contact to Order
+                      </button>
+                   </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      };
+
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
+    </script>
+  </body>
+</html>
