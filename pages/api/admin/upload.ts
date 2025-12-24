@@ -34,7 +34,7 @@ export default async function handler(
     });
     if (error) throw error;
 
-    const publicUrl = sb.storage.from(bucket).getPublicUrl(path).publicUrl;
+    const publicUrl = sb.storage.from(bucket).getPublicUrl(path).data.publicUrl;
     return res.status(201).json({ path, publicUrl, data });
   } catch (err: any) {
     console.error(err);
