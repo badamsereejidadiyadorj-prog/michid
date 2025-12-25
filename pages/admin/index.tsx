@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import Nav from "../../components/Nav";
 import AdminSidebar from "../../components/AdminSidebar";
 import { supabase } from "../../lib/supabaseClient";
@@ -147,60 +146,6 @@ export default function AdminIndex() {
     );
   }
 
-  async function addCategory() {
-    if (!newCat) return;
-    try {
-      const res = await fetch("/api/admin/categories", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: newCat.toLowerCase().replace(/\s+/g, "-"),
-          title_key: newCat,
-          image: null,
-        }),
-      });
-      if (!res.ok) throw new Error("Insert failed");
-      setNewCat("");
-      await fetchCategories();
-    } catch (err) {
-      alert("Insert failed (ensure table exists and env vars set)");
-      console.error(err);
-    }
-  }
-
-  async function initSampleData() {
-    try {
-      // Create sample categories via server API
-      await fetch("/api/admin/categories", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: "men", title_key: "Men", image: null }),
-      });
-      await fetch("/api/admin/categories", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: "women", title_key: "Women", image: null }),
-      });
-      // Create a sample order via server API
-      await fetch("/api/admin/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          phone: "+97699112233",
-          address: "Ulaanbaatar",
-          items: [],
-          total: 1200000,
-        }),
-      });
-      await fetchCategories();
-      await fetchOrders();
-      alert("Sample data init attempted. Check Supabase table rows.");
-    } catch (err) {
-      alert("Init failed — check Supabase config and table creation.");
-      console.error(err);
-    }
-  }
-
   return (
     <div className="min-h-screen bg-[#0f0518] text-[#F5F5DC]">
       <Nav lang={"mn"} setLang={() => {}} onSubmenu={() => {}} />
@@ -211,7 +156,7 @@ export default function AdminIndex() {
         </div>
 
         {!user && (
-          <div className="absolute inset-0 top-1/2 -translate-y-1/2 bg-black/60 backdrop-blur-sm z-40 flex items-center justify-center">
+          <div className="absolute inset-0 top-1/2 -translate-y-1/2 bg-black/60 h-screen backdrop-blur-sm z-40 flex items-center justify-center">
             <div className="bg-[#140824]  p-8 rounded-lg w-full max-w-md border border-purple-800">
               <h2 className="text-xl font-serif text-amber-300 mb-4">
                 Admin Login
