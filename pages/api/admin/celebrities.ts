@@ -22,6 +22,28 @@ export default async function handler(
       return res.status(201).json(data);
     }
 
+    if (req.method === "PUT") {
+      const { id, name, image, note } = req.body;
+      if (!id) return res.status(400).json({ error: "missing id" });
+      const { data, error } = await sb
+        .from("celebrities")
+        .update({ name, image, note })
+        .eq("id", id);
+      if (error) throw error;
+      return res.status(200).json(data);
+    }
+
+    if (req.method === "DELETE") {
+      const { id } = req.body;
+      if (!id) return res.status(400).json({ error: "missing id" });
+      const { data, error } = await sb
+        .from("celebrities")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+      return res.status(200).json(data);
+    }
+
     res.setHeader("Allow", ["GET", "POST"]);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   } catch (err: any) {

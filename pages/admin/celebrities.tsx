@@ -3,13 +3,14 @@ import Nav from "../../components/Nav";
 import AdminSidebar from "../../components/AdminSidebar";
 import { supabase } from "../../lib/supabaseClient";
 
-export default function AdminCategories() {
+export default function AdminCelebrities() {
   const [user, setUser] = useState<any>(null);
-  const [cats, setCats] = useState<any[]>([]);
-  const [title, setTitle] = useState("");
+  const [celebs, setCelebs] = useState<any[]>([]);
+  const [name, setName] = useState("");
   const [imagePath, setImagePath] = useState<string | null>(null);
+  const [note, setNote] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [editingCat, setEditingCat] = useState<any>(null);
+  const [editingCeleb, setEditingCeleb] = useState<any>(null);
   const [fileUploading, setFileUploading] = useState(false);
 
   /* ================= AUTH ================= */
@@ -32,58 +33,70 @@ export default function AdminCategories() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/admin/categories");
+        const res = await fetch("/api/admin/celebrities");
         if (res.ok) {
           const data = await res.json();
-          setCats(data || []);
+          setCelebs(data || []);
         }
-      } catch {}
+      } catch (e) {
+        console.warn(e);
+      }
     })();
   }, []);
 
   /* ================= ADD / UPDATE ================= */
-  const saveCategory = async () => {
-    if (!title.trim()) return;
+  const saveCeleb = async () => {
+    if (!name.trim()) return;
 
-    const id =
-      editingCat?.id ||
-      title
-        .toLowerCase()
-        .replace(/\s+/g, "-")
-        .replace(/[^a-z0-9-]/g, "");
+    const payload: any = { name: name.trim(), image: imagePath || "", note };
 
-    const payload = {
-      id,
-      title_key: title,
-      image: imagePath || "",
-    };
-
-    if (editingCat) {
-      setCats((s) => s.map((c) => (c.id === id ? payload : c)));
-    } else {
-      setCats((s) => [...s, payload]);
+    try {
+      if (editingCeleb) {
+        // optimistic update
+        setCelebs((s) =>
+          s.map((c) => (c.id === editingCeleb.id ? { ...c, ...payload } : c))
+        );
+        await fetch("/api/admin/celebrities", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: editingCeleb.id, ...payload }),
+        });
+      } else {
+        const res = await fetch("/api/admin/celebrities", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+          const created = await res.json();
+          // API returns array (supabase), take first
+          const row = Array.isArray(created) ? created[0] : created;
+          setCelebs((s) => [...s, row]);
+        }
+      }
+    } catch (e) {
+      console.warn(e);
     }
 
-    await fetch("/api/admin/categories", {
-      method: editingCat ? "PUT" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
     setShowModal(false);
-    setEditingCat(null);
-    setTitle("");
+    setEditingCeleb(null);
+    setName("");
     setImagePath(null);
+    setNote("");
   };
 
   /* ================= DELETE ================= */
   const remove = async (id: string) => {
-    setCats((s) => s.filter((c) => c.id !== id));
-    await fetch("/api/admin/categories", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    });
+    setCelebs((s) => s.filter((c) => c.id !== id));
+    try {
+      await fetch("/api/admin/celebrities", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+    } catch (e) {
+      console.warn(e);
+    }
   };
 
   /* ================= IMAGE UPLOAD ================= */
@@ -92,7 +105,7 @@ export default function AdminCategories() {
     const reader = new FileReader();
     reader.onload = async () => {
       const [, base64] = String(reader.result).split(",");
-      const path = `categories/${Date.now()}_${file.name.replace(
+      const path = `celebrities/${Date.now()}_${file.name.replace(
         /[^a-zA-Z0-9_.-]/g,
         "_"
       )}`;
@@ -140,18 +153,17 @@ export default function AdminCategories() {
 
         <div className="md:col-span-3">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-serif text-amber-400">
-              Ангилалын удирдлага
-            </h2>
+            <h2 className="text-2xl font-serif text-amber-400">Алдартнууд</h2>
             <button
               onClick={() => {
-                setEditingCat(null);
-                setTitle("");
+                setEditingCeleb(null);
+                setName("");
                 setImagePath(null);
+                setNote("");
                 setShowModal(true);
               }}
               className="px-4 py-2 bg-amber-500 text-black rounded hover:bg-amber-400">
-              + Шинэ ангилал
+              + Шинэ алдартан
             </button>
           </div>
 
@@ -162,12 +174,12 @@ export default function AdminCategories() {
                 <tr>
                   <th className="p-3 text-left">Зураг</th>
                   <th className="p-3 text-left">Нэр</th>
-                  <th className="p-3 text-left">ID</th>
+                  <th className="p-3 text-left">Тэмдэглэл</th>
                   <th className="p-3 text-right">Үйлдэл</th>
                 </tr>
               </thead>
               <tbody>
-                {cats.map((c) => (
+                {celebs.map((c) => (
                   <tr
                     key={c.id}
                     className="border-t border-purple-800 hover:bg-[#1a0b2e]">
@@ -183,16 +195,17 @@ export default function AdminCategories() {
                         </span>
                       )}
                     </td>
-                    <td className="p-3 text-amber-200 font-serif">{c.id}</td>
+                    <td className="p-3 text-amber-200 font-serif">{c.name}</td>
                     <td className="p-3 text-xs text-purple-400">
-                      {c.title_key}
+                      {c.note || "-"}
                     </td>
                     <td className="p-3 text-right space-x-2">
                       <button
                         onClick={() => {
-                          setEditingCat(c);
-                          setTitle(c.title_key);
-                          setImagePath(c.image);
+                          setEditingCeleb(c);
+                          setName(c.name || "");
+                          setImagePath(c.image || null);
+                          setNote(c.note || "");
                           setShowModal(true);
                         }}
                         className="px-3 py-1 text-xs border border-amber-400 text-amber-300 rounded">
@@ -219,14 +232,21 @@ export default function AdminCategories() {
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-[#140824] w-full max-w-md p-6 border border-purple-800 rounded">
             <h3 className="text-xl font-serif text-amber-400 mb-4">
-              {editingCat ? "Ангилал засах" : "Шинэ ангилал нэмэх"}
+              {editingCeleb ? "Алдартан засах" : "Шинэ алдартан"}
             </h3>
 
             <label className="text-sm text-purple-300">Нэр</label>
             <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full mb-4 px-3 py-2 bg-[#12041a] border border-purple-700 rounded"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full mb-3 px-3 py-2 bg-[#12041a] border border-purple-700 rounded"
+            />
+
+            <label className="text-sm text-purple-300">Тэмдэглэл</label>
+            <input
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              className="w-full mb-3 px-3 py-2 bg-[#12041a] border border-purple-700 rounded"
             />
 
             <label className="text-sm text-purple-300">Зураг</label>
@@ -255,7 +275,7 @@ export default function AdminCategories() {
                 Болих
               </button>
               <button
-                onClick={saveCategory}
+                onClick={saveCeleb}
                 className="px-4 py-2 bg-amber-500 text-black rounded">
                 Хадгалах
               </button>

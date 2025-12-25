@@ -80,7 +80,7 @@ export default function Nav({
 
         {/* Desktop Menu */}
         <div className="hidden lg:flex items-center gap-6 text-xs xl:text-sm uppercase tracking-widest text-purple-200">
-          <a
+          <Link
             href="/#home"
             onClick={() => {
               setActiveCategory?.(null);
@@ -88,11 +88,11 @@ export default function Nav({
             }}
             className="hover:text-amber-400 transition-colors">
             {TEXTS.nav_home[lang]}
-          </a>
+          </Link>
 
           {/* Collection Dropdown */}
           <div className="group relative">
-            <a
+            <Link
               href="/#collection"
               className="hover:text-amber-400 transition-colors py-4 flex items-center gap-1">
               {TEXTS.nav_collection[lang]}{" "}
@@ -100,7 +100,7 @@ export default function Nav({
                 size={12}
                 className="opacity-70 group-hover:rotate-180 transition-transform"
               />
-            </a>
+            </Link>
             <div className="absolute top-full left-1/2 -translate-x-1/2 w-48 bg-[#1a0b2e]/95 backdrop-blur-md border border-amber-500/30 shadow-[0_10px_40px_rgba(0,0,0,0.5)] rounded-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
               {usages && usages.length > 0 ? (
                 usages.map((u) => (
@@ -145,22 +145,26 @@ export default function Nav({
             </div>
           </div>
 
-          <a
+          <Link
             href="/#gallery"
             className="hover:text-amber-400 transition-colors">
             {TEXTS.nav_gallery[lang]}
-          </a>
-          <a href="#clients" className="hover:text-amber-400 transition-colors">
+          </Link>
+          <Link
+            href="#clients"
+            className="hover:text-amber-400 transition-colors">
             {TEXTS.nav_clients[lang]}
-          </a>
-          <a href="/#about" className="hover:text-amber-400 transition-colors">
+          </Link>
+          <Link
+            href="/#about"
+            className="hover:text-amber-400 transition-colors">
             {TEXTS.nav_about[lang]}
-          </a>
-          <a
+          </Link>
+          <Link
             href="/#contact"
             className="hover:text-amber-400 transition-colors">
             {TEXTS.nav_contact[lang]}
-          </a>
+          </Link>
 
           <button
             onClick={toggleLang}
@@ -183,7 +187,7 @@ export default function Nav({
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 bg-[#1a0b2e] z-40 flex flex-col items-center justify-center gap-8 text-xl font-serif">
-          <a
+          <Link
             href="#home"
             onClick={() => {
               setMobileMenuOpen(false);
@@ -191,10 +195,10 @@ export default function Nav({
               setActiveUsage?.(null);
             }}>
             {TEXTS.nav_home[lang]}
-          </a>
-          <a href="#collection" onClick={() => setMobileMenuOpen(false)}>
+          </Link>
+          <Link href="#collection" onClick={() => setMobileMenuOpen(false)}>
             {TEXTS.nav_collection[lang]}
-          </a>
+          </Link>
           {/* Mobile Submenu Items */}
           <div className="flex flex-col gap-4 items-center text-sm text-purple-300">
             {usages.length === 0 ? (
@@ -240,15 +244,15 @@ export default function Nav({
               ))
             )}
           </div>
-          <a href="#gallery" onClick={() => setMobileMenuOpen(false)}>
+          <Link href="#gallery" onClick={() => setMobileMenuOpen(false)}>
             {TEXTS.nav_gallery[lang]}
-          </a>
-          <a href="#clients" onClick={() => setMobileMenuOpen(false)}>
+          </Link>
+          <Link href="#clients" onClick={() => setMobileMenuOpen(false)}>
             {TEXTS.nav_clients[lang]}
-          </a>
-          <a href="#about" onClick={() => setMobileMenuOpen(false)}>
+          </Link>
+          <Link href="#about" onClick={() => setMobileMenuOpen(false)}>
             {TEXTS.nav_about[lang]}
-          </a>
+          </Link>
           <button
             onClick={toggleLang}
             className="text-amber-500 flex items-center gap-2">

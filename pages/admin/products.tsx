@@ -5,19 +5,6 @@ import { supabase } from "../../lib/supabaseClient";
 
 export default function AdminProducts() {
   const [user, setUser] = useState<any>(null);
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase.auth.getSession();
-      setUser(data?.session?.user ?? null);
-    })();
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
-    return () => listener?.subscription.unsubscribe();
-  }, []);
-
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [form, setForm] = useState<any>({
@@ -28,46 +15,60 @@ export default function AdminProducts() {
     usage: "ceremonial",
     image: "",
   });
+  const [showModal, setShowModal] = useState(false);
+  const [editing, setEditing] = useState<any>(null);
 
+  /* ================= AUTH ================= */
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      setUser(data?.session?.user ?? null);
+    })();
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => setUser(session?.user ?? null)
+    );
+    return () => listener?.subscription.unsubscribe();
+  }, []);
+
+  /* ================= FETCH ================= */
   useEffect(() => {
     (async () => {
       try {
         const res = await fetch("/api/admin/products");
-        if (res.ok) {
-          const data = await res.json();
-          setProducts(data || []);
-        } else {
-          setProducts([]);
-        }
-      } catch (e) {
+        setProducts((await res.json()) || []);
+      } catch {
         setProducts([]);
       }
-
       try {
         const res2 = await fetch("/api/admin/categories");
-        if (res2.ok) {
-          const cats = await res2.json();
-          setCategories(cats || []);
-          setForm((f: any) => ({ ...f, categoryId: cats?.[0]?.id || "" }));
-        }
-      } catch (e) {
+        const cats = (await res2.json()) || [];
+        setCategories(cats);
+        setForm((f: any) => ({ ...f, categoryId: cats?.[0]?.id || "" }));
+      } catch {
         setCategories([]);
       }
     })();
   }, []);
 
-  const add = async () => {
-    const newP = {
-      // server will assign id if desired; use timestamp for optimistic UI
-      id: Date.now(),
-      title: form.title,
-      description: form.description,
-      price: form.price,
-      category_id: form.categoryId,
-      usage: form.usage,
-      image: form.image,
-    };
-    setProducts((s) => [newP, ...s]);
+  /* ================= ADD / UPDATE ================= */
+  const save = async () => {
+    if (!form.title || !form.price) return;
+
+    if (editing) {
+      setProducts((s) =>
+        s.map((p) => (p.id === editing.id ? { ...editing, ...form } : p))
+      );
+    } else {
+      const newP = { ...form, id: Date.now() };
+      setProducts((s) => [newP, ...s]);
+    }
+
+    await fetch("/api/admin/products", {
+      method: editing ? "PUT" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(editing ? { ...editing, ...form } : form),
+    });
+
     setForm({
       title: "",
       description: "",
@@ -76,26 +77,21 @@ export default function AdminProducts() {
       usage: "ceremonial",
       image: "",
     });
-    try {
-      await fetch("/api/admin/products", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newP),
-      });
-    } catch (e) {}
+    setEditing(null);
+    setShowModal(false);
   };
 
   const remove = async (id: any) => {
+    if (!confirm("Энэ бүтээгдэхүүнийг устгах уу?")) return;
     setProducts((s) => s.filter((p) => p.id !== id));
-    try {
-      await fetch("/api/admin/products", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
-    } catch (e) {}
+    await fetch("/api/admin/products", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
   };
 
+  /* ================= FILE UPLOAD ================= */
   function fileToBase64(file: File) {
     return new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
@@ -125,131 +121,194 @@ export default function AdminProducts() {
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result?.error || "Upload failed");
-      // store returned path (server storage path)
       setForm((f: any) => ({ ...f, image: result.path || result.publicUrl }));
     } catch (err: any) {
       alert(err.message || String(err));
     }
   };
-  if (!user) {
+
+  /* ================= NO AUTH ================= */
+  if (!user)
     return (
       <div className="min-h-screen bg-[#0f0518] text-[#F5F5DC]">
-        <Nav lang={"mn"} setLang={() => {}} onSubmenu={() => {}} />
-        <main className="container mx-auto px-6 py-20 text-center">
-          <div className="bg-[#140824] p-8 rounded border border-purple-800 inline-block">
-            Энэ хуудас руу хандахын тулд /admin-аар нэвтэрнэ үү.
+        <Nav lang="mn" setLang={() => {}} onSubmenu={() => {}} />
+        <div className="pt-32 text-center">
+          <div className="inline-block p-6 bg-[#140824] border border-purple-800 rounded">
+            Админ эрхээр нэвтэрнэ үү
           </div>
-        </main>
+        </div>
       </div>
     );
-  }
+
+  /* ================= UI ================= */
   return (
     <div className="min-h-screen bg-[#0f0518] text-[#F5F5DC]">
-      <Nav lang={"mn"} setLang={() => {}} onSubmenu={() => {}} />
-      <main className="container  pt-20 mx-auto px-6 py-12 grid md:grid-cols-4 gap-6">
-        <div className="md:col-span-1">
-          <AdminSidebar />
-        </div>
+      <Nav lang="mn" setLang={() => {}} onSubmenu={() => {}} />
+      <main className="container mx-auto px-6 pt-24 grid md:grid-cols-4 gap-6">
+        <AdminSidebar />
+
         <div className="md:col-span-3">
-          <h2 className="text-2xl font-serif text-amber-400 mb-4">
-            Бүтээгдэхүүн удирдах
-          </h2>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-serif text-amber-400">
+              Бүтээгдэхүүн удирдах
+            </h2>
+            <button
+              onClick={() => {
+                setForm({
+                  title: "",
+                  description: "",
+                  price: "",
+                  categoryId: categories[0]?.id || "",
+                  usage: "ceremonial",
+                  image: "",
+                });
+                setEditing(null);
+                setShowModal(true);
+              }}
+              className="px-4 py-2 bg-amber-500 text-black rounded hover:bg-amber-400">
+              + Шинэ бүтээгдэхүүн
+            </button>
+          </div>
 
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            <div className="p-4 bg-[#140824] rounded border border-purple-800">
-              <h3 className="font-semibold mb-3">Шинэ бүтээгдэхүүн</h3>
-              <input
-                className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded"
-                placeholder="Гарчиг"
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-              />
-              <input
-                className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded"
-                placeholder="Үнэ"
-                value={form.price}
-                onChange={(e) => setForm({ ...form, price: e.target.value })}
-              />
-              <select
-                value={form.categoryId}
-                onChange={(e) =>
-                  setForm({ ...form, categoryId: e.target.value })
-                }
-                className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded">
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.title_key || c.id}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={form.usage}
-                onChange={(e) => setForm({ ...form, usage: e.target.value })}
-                className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded">
-                <option value="ceremonial">Ариун ёслолын</option>
-                <option value="everyday">Өдөр тутмын</option>
-                <option value="winter">Өвлийн</option>
-              </select>
-              <textarea
-                className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded"
-                placeholder="Тайлбар"
-                value={form.description}
-                onChange={(e) =>
-                  setForm({ ...form, description: e.target.value })
-                }
-              />
-              <div className="mb-2">
-                <label className="text-sm text-purple-300 block mb-1">
-                  Зураг оруулах
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) uploadFile(f);
-                  }}
-                />
-                {form.image && (
-                  <div className="text-xs text-purple-300 mt-2">
-                    Хуулагдсан: {form.image}
-                  </div>
-                )}
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={add}
-                  className="px-4 py-2 bg-amber-500 rounded">
-                  Бүтээгдэхүүн нэмэх
-                </button>
-              </div>
-            </div>
-
-            <div className="p-4 bg-[#140824] rounded border border-purple-800 overflow-auto max-h-[420px]">
-              <h3 className="font-semibold mb-3">Одоо байгаа</h3>
-              <div className="space-y-3">
-                {products.map((p: any) => (
-                  <div
+          {/* PRODUCT TABLE */}
+          <div className="overflow-x-auto bg-[#140824] border border-purple-800 rounded">
+            <table className="w-full text-sm">
+              <thead className="bg-[#1a0b2e] text-purple-300">
+                <tr>
+                  <th className="p-3 text-left">Гарчиг</th>
+                  <th className="p-3 text-left">Үнэ</th>
+                  <th className="p-3 text-left">Ангилал</th>
+                  <th className="p-3 text-left">Ашиглалт</th>
+                  <th className="p-3 text-left">Зураг</th>
+                  <th className="p-3 text-right">Үйлдэл</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map((p) => (
+                  <tr
                     key={p.id}
-                    className="flex justify-between items-center p-2 bg-[#12041a] rounded">
-                    <div>
-                      <div className="font-serif text-amber-200">{p.title}</div>
-                      <div className="text-xs text-purple-300">
-                        {p.price} • {p.category_id || p.categoryId}
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => remove(p.id)}
-                      className="text-red-400 text-sm">
-                      Устгах
-                    </button>
-                  </div>
+                    className="border-t border-purple-800 hover:bg-[#1a0b2e] transition">
+                    <td className="p-3">{p.title}</td>
+                    <td className="p-3">{p.price}</td>
+                    <td className="p-3">{p.category_id || p.categoryId}</td>
+                    <td className="p-3">{p.usage}</td>
+                    <td className="p-3">
+                      {p.image && (
+                        <img
+                          src={p.image}
+                          alt={p.title}
+                          className="w-12 h-12 object-cover rounded border border-purple-700"
+                        />
+                      )}
+                    </td>
+                    <td className="p-3 text-right space-x-2">
+                      <button
+                        onClick={() => {
+                          setEditing(p);
+                          setForm({ ...p });
+                          setShowModal(true);
+                        }}
+                        className="px-3 py-1 text-xs border border-amber-400 text-amber-300 rounded">
+                        Засах
+                      </button>
+                      <button
+                        onClick={() => remove(p.id)}
+                        className="px-3 py-1 text-xs border border-red-500 text-red-400 rounded">
+                        Устгах
+                      </button>
+                    </td>
+                  </tr>
                 ))}
-              </div>
-            </div>
+              </tbody>
+            </table>
           </div>
         </div>
       </main>
+
+      {/* MODAL */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-[#140824] w-full max-w-md p-6 border border-purple-800 rounded">
+            <h3 className="text-xl font-serif text-amber-400 mb-4">
+              {editing ? "Бүтээгдэхүүн засах" : "Шинэ бүтээгдэхүүн"}
+            </h3>
+
+            <input
+              className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded"
+              placeholder="Гарчиг"
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+            />
+            <input
+              className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded"
+              placeholder="Үнэ"
+              value={form.price}
+              onChange={(e) => setForm({ ...form, price: e.target.value })}
+            />
+            <select
+              value={form.categoryId}
+              onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
+              className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded">
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.title_key || c.id}
+                </option>
+              ))}
+            </select>
+            <select
+              value={form.usage}
+              onChange={(e) => setForm({ ...form, usage: e.target.value })}
+              className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded">
+              <option value="ceremonial">Ариун ёслолын</option>
+              <option value="everyday">Өдөр тутмын</option>
+              <option value="winter">Өвлийн</option>
+            </select>
+            <textarea
+              className="w-full mb-2 p-2 bg-[#12041a] border border-purple-700 rounded"
+              placeholder="Тайлбар"
+              value={form.description}
+              onChange={(e) =>
+                setForm({ ...form, description: e.target.value })
+              }
+            />
+            <div className="mb-2">
+              <label className="text-sm text-purple-300 block mb-1">
+                Зураг оруулах
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) uploadFile(f);
+                }}
+              />
+              {form.image && (
+                <div className="text-xs text-purple-300 mt-2">
+                  Preview:{" "}
+                  <img
+                    src={form.image}
+                    className="w-16 h-16 object-cover rounded border border-purple-700 mt-1"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 border border-purple-600 rounded text-purple-300">
+                Болих
+              </button>
+              <button
+                onClick={save}
+                className="px-4 py-2 bg-amber-500 text-black rounded">
+                Хадгалах
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -34,6 +34,11 @@ export default function AdminSidebar() {
           Ашиглалт
         </Link>
         <Link
+          href="/admin/celebrities"
+          className="block p-2 rounded hover:bg-purple-800">
+          Алдартнууд
+        </Link>
+        <Link
           href="/admin/orders"
           className="block p-2 rounded hover:bg-purple-800">
           Захиалгууд
