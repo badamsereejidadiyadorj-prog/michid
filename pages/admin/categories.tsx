@@ -22,7 +22,7 @@ export default function AdminCategories() {
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setUser(session?.user ?? null);
-      }
+      },
     );
 
     return () => listener?.subscription.unsubscribe();
@@ -94,14 +94,14 @@ export default function AdminCategories() {
       const [, base64] = String(reader.result).split(",");
       const path = `categories/${Date.now()}_${file.name.replace(
         /[^a-zA-Z0-9_.-]/g,
-        "_"
+        "_",
       )}`;
 
       const res = await fetch("/api/admin/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          bucket: "public",
+          bucket: "categories",
           path,
           base64,
           contentType: file.type,

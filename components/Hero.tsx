@@ -48,7 +48,7 @@ export default function Hero({ lang }: any) {
 
           <ThreeDCard className="w-[300px] h-[450px] md:w-[400px] md:h-[600px] rounded-t-[100px] rounded-b-2xl overflow-hidden shadow-[0_20px_60px_rgba(40,10,70,0.6)] border border-amber-500/20 bg-[#1a0b2e]">
             <img
-              src="https://images.unsplash.com/photo-1552874869-5c39ec9288dc?q=80&w=800&auto=format&fit=crop"
+              src="/hero.jpg"
               alt="Michid Hero Product"
               className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity duration-500 hover:scale-110"
             />

@@ -46,7 +46,6 @@ export default function Nav({
     })();
   }, []);
   const toggleLang = () => {
-    return;
     if (!setLang) return;
     if (lang === "mn") setLang("en");
     else setLang("mn");

@@ -22,6 +22,16 @@ export default async function handler(
       return res.status(201).json(data);
     }
 
+    if (req.method === "PUT") {
+      const { id, title_key, image } = req.body;
+      const { data, error } = await sb
+        .from("categories")
+        .update({ title_key, image })
+        .eq("id", id);
+      if (error) throw error;
+      return res.status(200).json(data);
+    }
+
     if (req.method === "DELETE") {
       const { id } = req.body;
       const { data, error } = await sb.from("categories").delete().eq("id", id);
@@ -29,7 +39,7 @@ export default async function handler(
       return res.status(200).json({ deleted: id });
     }
 
-    res.setHeader("Allow", ["GET", "POST", "DELETE"]);
+    res.setHeader("Allow", ["GET", "POST", "PUT", "DELETE"]);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   } catch (err: any) {
     res.status(500).json({ error: err.message || String(err) });

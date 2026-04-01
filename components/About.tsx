@@ -10,12 +10,12 @@ export default function About({ lang = "mn" }: any) {
     <section id="about" className="py-20 relative overflow-hidden bg-[#140824]">
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')] opacity-10 mix-blend-overlay"></div>
       <div className="container mx-auto px-6 grid md:grid-cols-2 gap-16 items-center relative z-10">
-        <div className="order-2 md:order-1">
-          <ThreeDCard className="w-full h-[500px] rounded-2xl overflow-hidden border border-amber-500/20 shadow-[0_0_40px_rgba(124,58,237,0.15)]">
+        <div className="order-2 md:order-1 w-auto ">
+          <ThreeDCard className="mx-auto w-auto h- rounded-2xl overflow-hidden border border-amber-500/20 shadow-[0_0_40px_rgba(124,58,237,0.15)]">
             <img
-              src="https://images.unsplash.com/photo-1548883354-94bcfe321cbb?q=80&w=800&auto=format&fit=crop"
+              src="/about.jpg"
               alt="Craftsmanship"
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000"
+              className="w-full h-full object-contain hover:scale-105 transition-transform duration-1000"
             />
           </ThreeDCard>
         </div>
