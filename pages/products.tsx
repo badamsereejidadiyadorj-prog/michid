@@ -144,7 +144,10 @@ export default function ProductsPage() {
                   <ThreeDCard className="group bg-[#1a0b2e] rounded-xl overflow-hidden border border-purple-900/50 hover:border-amber-500/50 shadow-xl transition-all duration-300">
                     <div className="h-72 overflow-hidden relative">
                       <img
-                        src={p.image}
+                        src={
+                          "https://iusgurgxisdboxpchxnv.supabase.co/storage/v1/object/public/images/" +
+                          p.image
+                        }
                         alt={p.title}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />
@@ -185,7 +188,7 @@ export default function ProductsPage() {
           relatedProducts={products
             .filter(
               (x) =>
-                x.categoryId === selected.categoryId && x.id !== selected.id
+                x.categoryId === selected.categoryId && x.id !== selected.id,
             )
             .slice(0, 3)}
           handleShare={async () => {

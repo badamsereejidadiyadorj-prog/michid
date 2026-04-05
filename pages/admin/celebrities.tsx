@@ -23,7 +23,7 @@ export default function AdminCelebrities() {
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setUser(session?.user ?? null);
-      }
+      },
     );
 
     return () => listener?.subscription.unsubscribe();
@@ -54,7 +54,7 @@ export default function AdminCelebrities() {
       if (editingCeleb) {
         // optimistic update
         setCelebs((s) =>
-          s.map((c) => (c.id === editingCeleb.id ? { ...c, ...payload } : c))
+          s.map((c) => (c.id === editingCeleb.id ? { ...c, ...payload } : c)),
         );
         await fetch("/api/admin/celebrities", {
           method: "PUT",
@@ -107,14 +107,14 @@ export default function AdminCelebrities() {
       const [, base64] = String(reader.result).split(",");
       const path = `celebrities/${Date.now()}_${file.name.replace(
         /[^a-zA-Z0-9_.-]/g,
-        "_"
+        "_",
       )}`;
 
       const res = await fetch("/api/admin/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          bucket: "public",
+          bucket: "images",
           path,
           base64,
           contentType: file.type,

@@ -25,7 +25,7 @@ export default function AdminProducts() {
       setUser(data?.session?.user ?? null);
     })();
     const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => setUser(session?.user ?? null)
+      (_event, session) => setUser(session?.user ?? null),
     );
     return () => listener?.subscription.unsubscribe();
   }, []);
@@ -54,19 +54,27 @@ export default function AdminProducts() {
   const save = async () => {
     if (!form.title || !form.price) return;
 
+    const payload = {
+      ...form,
+      category_id: form.categoryId,
+      price: String(form.price),
+    };
+
+    delete payload.categoryId;
+
     if (editing) {
       setProducts((s) =>
-        s.map((p) => (p.id === editing.id ? { ...editing, ...form } : p))
+        s.map((p) => (p.id === editing.id ? { ...editing, ...payload } : p)),
       );
     } else {
-      const newP = { ...form, id: Date.now() };
+      const newP = { ...payload, id: Date.now() };
       setProducts((s) => [newP, ...s]);
     }
 
     await fetch("/api/admin/products", {
       method: editing ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editing ? { ...editing, ...form } : form),
+      body: JSON.stringify(editing ? { ...editing, ...payload } : payload),
     });
 
     setForm({
@@ -77,10 +85,10 @@ export default function AdminProducts() {
       usage: "ceremonial",
       image: "",
     });
+
     setEditing(null);
     setShowModal(false);
   };
-
   const remove = async (id: any) => {
     if (!confirm("Энэ бүтээгдэхүүнийг устгах уу?")) return;
     setProducts((s) => s.filter((p) => p.id !== id));
@@ -107,13 +115,13 @@ export default function AdminProducts() {
       const [, base64] = dataUrl.split(",");
       const path = `products/${Date.now()}_${file.name.replace(
         /[^a-zA-Z0-9_.-]/g,
-        "_"
+        "_",
       )}`;
       const res = await fetch("/api/admin/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          bucket: "public",
+          bucket: "images",
           path,
           base64,
           contentType: file.type,
@@ -195,7 +203,10 @@ export default function AdminProducts() {
                     <td className="p-3">
                       {p.image && (
                         <img
-                          src={p.image}
+                          src={
+                            "https://iusgurgxisdboxpchxnv.supabase.co/storage/v1/object/public/images/" +
+                            p.image
+                          }
                           alt={p.title}
                           className="w-12 h-12 object-cover rounded border border-purple-700"
                         />
@@ -205,7 +216,10 @@ export default function AdminProducts() {
                       <button
                         onClick={() => {
                           setEditing(p);
-                          setForm({ ...p });
+                          setForm({
+                            ...p,
+                            categoryId: p.category_id,
+                          });
                           setShowModal(true);
                         }}
                         className="px-3 py-1 text-xs border border-amber-400 text-amber-300 rounded">
@@ -287,7 +301,10 @@ export default function AdminProducts() {
                 <div className="text-xs text-purple-300 mt-2">
                   Preview:{" "}
                   <img
-                    src={form.image}
+                    src={
+                      "https://iusgurgxisdboxpchxnv.supabase.co/storage/v1/object/public/images/" +
+                      form.image
+                    }
                     className="w-16 h-16 object-cover rounded border border-purple-700 mt-1"
                   />
                 </div>

@@ -64,7 +64,10 @@ export default function ProductModal({
         <div className="w-full md:w-1/2 min-h-[40vh] md:h-auto relative bg-black group shrink-0">
           <div className="w-full h-full relative overflow-hidden">
             <img
-              src={activeImage || selectedProduct.image}
+              src={
+                "https://iusgurgxisdboxpchxnv.supabase.co/storage/v1/object/public/images/" +
+                  activeImage || selectedProduct.image
+              }
               alt={selectedProduct.title}
               className="w-full h-full object-cover transition-all duration-500"
             />
@@ -84,12 +87,15 @@ export default function ProductModal({
                         : "border-white/20 hover:border-white/50 opacity-70 hover:opacity-100"
                     }`}>
                     <img
-                      src={img}
+                      src={
+                        "https://iusgurgxisdboxpchxnv.supabase.co/storage/v1/object/public/images/" +
+                        img
+                      }
                       alt={`Thumbnail ${index}`}
                       className="w-full h-full object-cover"
                     />
                   </button>
-                )
+                ),
               )}
             </div>
           )}
@@ -165,14 +171,17 @@ export default function ProductModal({
                       setSelectedProduct(rp);
                       setActiveImage(rp.image);
                       const rightPanel = e.currentTarget.closest(
-                        ".overflow-y-auto"
+                        ".overflow-y-auto",
                       ) as HTMLElement;
                       if (rightPanel) rightPanel.scrollTop = 0;
                     }}
                     className="group cursor-pointer">
                     <div className="aspect-[3/4] rounded bg-purple-900/50 overflow-hidden relative border border-purple-500/20 group-hover:border-amber-500/50 transition-all">
                       <img
-                        src={rp.image}
+                        src={
+                          "https://iusgurgxisdboxpchxnv.supabase.co/storage/v1/object/public/images/" +
+                          rp.image
+                        }
                         alt={rp.title}
                         className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity"
                       />

@@ -79,7 +79,10 @@ export default function CartPage() {
             className="flex items-center gap-4 mb-4 bg-[#140824] p-4 rounded">
             {it.image && (
               <img
-                src={it.image}
+                src={
+                  "https://iusgurgxisdboxpchxnv.supabase.co/storage/v1/object/public/images/" +
+                  it.image
+                }
                 alt={it.title}
                 className="w-20 h-20 object-cover rounded"
               />

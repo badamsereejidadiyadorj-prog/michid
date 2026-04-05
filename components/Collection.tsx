@@ -53,11 +53,11 @@ export default function Collection({
   const filteredProducts = activeCategory
     ? products.filter(
         (p: any) =>
-          p.category_id === activeCategory || p.categoryId === activeCategory
+          p.category_id === activeCategory || p.categoryId === activeCategory,
       )
     : activeUsage
-    ? products.filter((p: any) => p.usage === activeUsage)
-    : [];
+      ? products.filter((p: any) => p.usage === activeUsage)
+      : [];
 
   return (
     <section id="collection" className="py-20 bg-[#140824] relative">
@@ -82,7 +82,7 @@ export default function Collection({
                       if (handleSubMenuClick) handleSubMenuClick(u.key);
                       else
                         router.push(
-                          `/products?usage=${encodeURIComponent(u.key)}`
+                          `/products?usage=${encodeURIComponent(u.key)}`,
                         );
                     }}
                     className="px-4 py-2 bg-[#1a0b2e]/70 border border-purple-700 rounded text-purple-200 text-sm hover:bg-amber-500/10">
@@ -149,7 +149,10 @@ export default function Collection({
                   <ThreeDCard className="group bg-[#1a0b2e] rounded-xl overflow-hidden border border-purple-900/50 hover:border-amber-500/50 shadow-xl transition-all duration-300">
                     <div className="h-96 overflow-hidden relative">
                       <img
-                        src={product.image}
+                        src={
+                          "https://iusgurgxisdboxpchxnv.supabase.co/storage/v1/object/public/images/" +
+                          product.image
+                        }
                         alt={product.title}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />
