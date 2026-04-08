@@ -23,8 +23,7 @@ export default async function handler(
         const { data, error } = await sb
           .from("products")
           .insert(req.body)
-          .select()
-          .single();
+          .select();
 
         if (error) throw error;
         return res.status(201).json(data);
@@ -47,10 +46,7 @@ export default async function handler(
       case "DELETE": {
         const { id } = req.body;
 
-        const { error } = await sb
-          .from("products")
-          .delete()
-          .eq("id", id);
+        const { error } = await sb.from("products").delete().eq("id", id);
 
         if (error) throw error;
         return res.status(200).json({ deleted: id });

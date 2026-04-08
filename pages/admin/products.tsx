@@ -58,6 +58,8 @@ export default function AdminProducts() {
       ...form,
       category_id: form.categoryId,
       price: String(form.price),
+      image: form.image || null,
+      id: +Date.now(),
     };
 
     delete payload.categoryId;
